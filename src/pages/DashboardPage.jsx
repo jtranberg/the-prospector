@@ -21,10 +21,10 @@ function DashboardPage({ prospects = [] }) {
   const [searchResults, setSearchResults] = useState([]);
   const [enrichLoading, setEnrichLoading] = useState(false);
 
-  const selectedPlayer = prospects.find(
-    (player) =>
-      String(player.eliteId || player.id) === String(selectedPlayerId),
-  );
+const selectedPlayer = selectableProspects.find(
+  (player) =>
+    String(player.eliteId || player.id) === String(selectedPlayerId),
+);
 
   const displayPlayer = selectedPlayerDetail || selectedPlayer;
   const topProspect = prospects[0];

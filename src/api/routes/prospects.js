@@ -305,8 +305,11 @@ router.get("/", async (req, res) => {
     const filter = {};
 
     if (q) {
-      filter.name = { $regex: q, $options: "i" };
-    }
+  filter.$or = [
+    { name: { $regex: q, $options: "i" } },
+    { nationality: { $regex: q, $options: "i" } },
+  ];
+}
 
     if (league) filter.league = league;
     if (team) filter.team = team;
