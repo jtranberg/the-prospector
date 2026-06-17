@@ -1,0 +1,6 @@
+id,name,team,league,position,age,games,goals,assists,points,pim,status,upside
+1,Liam Carter,Victoria Grizzlies,BCHL,C,17,42,18,31,49,22,Invite,High
+2,Noah Bennett,Penticton Vees,BCHL,LW,16,38,21,17,38,18,Watch,Elite
+3,Ethan Brooks,Nanaimo Clippers,BCHL,D,17,44,7,26,33,30,Watch,High
+4,Caleb Morrison,Trail Smoke Eaters,BCHL,RW,18,46,24,20,44,36,Review,Medium
+5,Owen Reid,Surrey Eagles,BCHL,G,17,35,0,2,2,4,Watch,High
