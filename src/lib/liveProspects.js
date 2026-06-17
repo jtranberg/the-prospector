@@ -16,3 +16,13 @@ export async function loadProspects(limit = 100, page = 1) {
 
   return data.players || [];
 }
+
+export async function loadProspectById(id) {
+  const response = await fetch(`${API_BASE}/api/prospects/${id}`);
+
+  if (!response.ok) {
+    throw new Error("Mongo prospect detail unavailable");
+  }
+
+  return await response.json();
+}
