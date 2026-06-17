@@ -1,14 +1,12 @@
 {
-  "name": "scoutboard",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "api": "node src/api/server.js",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+ "scripts": {
+  "dev": "vite",
+  "api": "node src/api/server.js",
+  "start": "node src/api/server.js",
+  "build": "vite build",
+  "lint": "eslint .",
+  "preview": "vite preview"
+
   },
   "dependencies": {
     "cors": "^2.8.6",
