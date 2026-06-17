@@ -1,4 +1,3 @@
-
 /* eslint-disable no-undef */
 import express from "express";
 import cors from "cors";
@@ -14,7 +13,10 @@ const PORT = process.env.PORT || 5050;
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://the-prospector.netlify.app",
+    ],
   }),
 );
 

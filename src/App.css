@@ -549,7 +549,7 @@ td small {
 }
 
 .selected-stat-grid .stat-card {
-  min-width: 0;
+  min-width: 75%;
 }
 
 .compact-stat {
