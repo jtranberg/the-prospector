@@ -10,6 +10,7 @@ import {
   loadProspectById,
   searchProspects,
   enrichProspectById,
+  loadProspectStats,
 } from "../lib/liveProspects";
 
 function DashboardPage({ prospects = [] }) {
@@ -17,25 +18,65 @@ function DashboardPage({ prospects = [] }) {
   const [selectedPlayerDetail, setSelectedPlayerDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
+  // Database stats come from /api/prospects/stats.
+  const [dbStats, setDbStats] = useState(null);
+  const [statsError, setStatsError] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [enrichLoading, setEnrichLoading] = useState(false);
 
-const selectedPlayer = selectableProspects.find(
-  (player) =>
-    String(player.eliteId || player.id) === String(selectedPlayerId),
-);
+  // Search results control the dropdown when present.
+  // Otherwise the dropdown uses the loaded prospects list.
+  const selectableProspects = searchResults.length ? searchResults : prospects;
+
+  // True Mongo player count.
+  // This is separate from loaded list count and search result count.
+  const dbPlayerCount = dbStats?.total ?? null;
+  const playerCountDisplay = statsError
+    ? "Unavailable"
+    : dbPlayerCount ?? "Loading...";
+
+  const loadedPlayerCount = prospects.length;
+  const searchResultCount = searchResults.length;
+
+  const selectedPlayer = selectableProspects.find(
+    (player) =>
+      String(player.eliteId || player.id) === String(selectedPlayerId),
+  );
 
   const displayPlayer = selectedPlayerDetail || selectedPlayer;
   const topProspect = prospects[0];
+
+  // Scout XP is based on currently loaded prospects, not the full DB.
   const scoutXP = getScoutXP(prospects);
   const scoutLevel = getScoutLevel(scoutXP);
 
-  const selectableProspects = searchResults.length ? searchResults : prospects;
+  // Load database-level stats once when dashboard opens.
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        setStatsError(false);
+
+        const stats = await loadProspectStats();
+        setDbStats(stats);
+      } catch (error) {
+        console.error("Unable to load DB stats:", error);
+        setStatsError(true);
+      }
+    }
+
+    loadStats();
+  }, []);
 
   async function handleSearch() {
-    const results = await searchProspects(searchTerm, 100);
-    setSearchResults(results);
+    try {
+      const results = await searchProspects(searchTerm, 100);
+      setSearchResults(results);
+    } catch (error) {
+      console.error("Unable to search prospects:", error);
+      setSearchResults([]);
+    }
   }
 
   async function handleEnrich() {
@@ -43,10 +84,16 @@ const selectedPlayer = selectableProspects.find(
 
     try {
       setEnrichLoading(true);
+
       await enrichProspectById(selectedPlayerId);
 
       const detail = await loadProspectById(selectedPlayerId);
       setSelectedPlayerDetail(detail);
+
+      // Refresh stats after enrichment.
+      const stats = await loadProspectStats();
+      setDbStats(stats);
+      setStatsError(false);
     } catch (error) {
       console.error("Unable to enrich player:", error);
     } finally {
@@ -54,6 +101,7 @@ const selectedPlayer = selectableProspects.find(
     }
   }
 
+  // Load full Mongo player detail when a prospect is selected.
   useEffect(() => {
     if (!selectedPlayerId) return;
 
@@ -62,12 +110,10 @@ const selectedPlayer = selectableProspects.find(
     async function loadDetail() {
       try {
         setDetailLoading(true);
+
         const detail = await loadProspectById(selectedPlayerId);
 
-        console.log("MONGO DETAIL LOADED:", detail);
-
         if (!cancelled) {
-          console.log("SETTING DETAIL:", detail);
           setSelectedPlayerDetail(detail);
         }
       } catch (error) {
@@ -86,11 +132,6 @@ const selectedPlayer = selectableProspects.find(
     };
   }, [selectedPlayerId]);
 
-  console.log("SELECTED ID:", selectedPlayerId);
-  console.log("SELECTED PLAYER:", selectedPlayer);
-  console.log("SELECTED DETAIL:", selectedPlayerDetail);
-  console.log("DISPLAY PLAYER:", displayPlayer);
-
   return (
     <main className="app-shell">
       <section className="hero">
@@ -102,23 +143,59 @@ const selectedPlayer = selectableProspects.find(
       </section>
 
       <section className="stats-grid">
-        <StatCard label="Total Prospects" value={prospects.length} />
+        <StatCard label="Players" value={playerCountDisplay} />
+
+        <StatCard label="Loaded List" value={loadedPlayerCount} />
+
+        <StatCard label="Search Results" value={searchResultCount} />
+
         <StatCard
           label="Invite Targets"
           value={prospects.filter((p) => p.status === "Invite").length}
         />
+
         <StatCard
           label="Top Score"
           value={topProspect ? getProspectScore(topProspect) : 0}
         />
+
         <StatCard label="Scout XP" value={scoutXP} />
+
         <StatCard label="Scout Level" value={scoutLevel} compact />
       </section>
 
       <section className="dashboard-card player-selector-card">
         <div className="section-header">
           <h2>Scouting Intelligence Center</h2>
-          <p>{prospects.length} Mongo Prospects • Local Database</p>
+
+          <p>
+            {playerCountDisplay} Players • {loadedPlayerCount} Loaded •{" "}
+            {searchResultCount} Search Results
+          </p>
+        </div>
+
+        <div className="selected-stat-grid">
+          <StatCard label="Players" value={playerCountDisplay} compact />
+
+          <StatCard
+            label="Countries"
+            value={
+              statsError ? "Unavailable" : dbStats?.countries ?? "Loading..."
+            }
+            compact
+          />
+
+          <StatCard
+            label="Enriched"
+            value={statsError ? "Unavailable" : dbStats?.enriched ?? 0}
+            compact
+          />
+
+          <StatCard
+            label="Duplicates"
+            value={statsError ? "Unavailable" : dbStats?.duplicateCount ?? 0}
+            compact
+          />
         </div>
 
         <div className="search-row">
@@ -138,8 +215,6 @@ const selectedPlayer = selectableProspects.find(
           className="player-select"
           value={selectedPlayerId}
           onChange={(e) => {
-            console.log("SELECTED PLAYER ID:", e.target.value);
-
             setSelectedPlayerDetail(null);
             setSelectedPlayerId(e.target.value);
           }}
@@ -178,12 +253,14 @@ const selectedPlayer = selectableProspects.find(
           <section className="dashboard-card player-detail-card">
             <div className="section-header">
               <h2>{displayPlayer.name || "Unknown Player"}</h2>
+
               <p>
                 {displayPlayer.team || "Team unavailable"} •{" "}
                 {displayPlayer.league || "League unavailable"} •{" "}
                 {displayPlayer.position || "N/A"} • Age{" "}
                 {displayPlayer.age || "N/A"}
               </p>
+
               <button
                 className="button-link"
                 type="button"
@@ -200,42 +277,85 @@ const selectedPlayer = selectableProspects.find(
             </div>
 
             <div className="selected-stat-grid">
+              <StatCard label="Games" value={displayPlayer.games ?? 0} compact />
+              <StatCard label="Goals" value={displayPlayer.goals ?? 0} compact />
+              <StatCard label="Assists" value={displayPlayer.assists ?? 0} compact />
+              <StatCard label="Points" value={displayPlayer.points ?? 0} compact />
+
               <StatCard
-                label="Games"
-                value={displayPlayer.games ?? 0}
+                label="Profile"
+                value={displayPlayer.enriched ? "Enriched" : "Basic"}
                 compact
               />
+
               <StatCard
-                label="Goals"
-                value={displayPlayer.goals ?? 0}
+                label="Birthplace"
+                value={displayPlayer.placeOfBirth || "N/A"}
                 compact
               />
+
               <StatCard
-                label="Assists"
-                value={displayPlayer.assists ?? 0}
+                label="Birth Year"
+                value={displayPlayer.yearOfBirth || "N/A"}
                 compact
               />
+
               <StatCard
-                label="Points"
-                value={displayPlayer.points ?? 0}
+                label="DOB"
+                value={displayPlayer.dateOfBirth || "N/A"}
                 compact
               />
+
+              <StatCard
+                label="League Level"
+                value={displayPlayer.leagueLevel || "N/A"}
+                compact
+              />
+
+              <StatCard
+                label="League Type"
+                value={displayPlayer.leagueType || "N/A"}
+                compact
+              />
+
+              <StatCard
+                label="Team Country"
+                value={displayPlayer.teamCountry || "N/A"}
+                compact
+              />
+
+              <StatCard
+                label="Game Status"
+                value={displayPlayer.gameStatus || "N/A"}
+                compact
+              />
+
+              <StatCard
+                label="Elite ID"
+                value={displayPlayer.eliteId || displayPlayer.id || "N/A"}
+                compact
+              />
+
               <StatCard
                 label="PPG"
                 value={displayPlayer.ppg ?? getPPG(displayPlayer)}
                 compact
               />
+
               <StatCard label="PIM" value={displayPlayer.pim ?? 0} compact />
+
               <StatCard
                 label="Nationality"
                 value={displayPlayer.nationality || "N/A"}
                 compact
               />
+
               <StatCard
                 label="Height"
                 value={displayPlayer.heightImperial || "N/A"}
                 compact
               />
+
               <StatCard
                 label="Weight"
                 value={
@@ -245,16 +365,19 @@ const selectedPlayer = selectableProspects.find(
                 }
                 compact
               />
+
               <StatCard
                 label={displayPlayer.handednessLabel || "Shoots"}
                 value={displayPlayer.shoots || "N/A"}
                 compact
               />
+
               <StatCard
                 label="Season"
                 value={displayPlayer.season || "N/A"}
                 compact
               />
+
               <StatCard
                 label="Jersey"
                 value={displayPlayer.jerseyNumber || "N/A"}

@@ -53,3 +53,29 @@ export async function enrichProspectById(id) {
 
   return await response.json();
 }
+
+export async function loadProspectStats() {
+  const url = `${API_BASE}/api/prospects/stats`;
+
+  console.log("LOADING PROSPECT STATS FROM:", url);
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    const text = await response.text();
+
+    console.error("STATS REQUEST FAILED:", {
+      url,
+      status: response.status,
+      body: text,
+    });
+
+    throw new Error("Stats unavailable");
+  }
+
+  const data = await response.json();
+
+  console.log("STATS RESPONSE:", data);
+
+  return data;
+}

@@ -84,8 +84,18 @@ body {
   box-shadow: 0 20px 70px rgba(0, 0, 0, 0.28);
 }
 
+.dashboard-card .stat-card 
+{
+  width: 50%;
+  margin: auto;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+
 .stat-card {
-  padding: 24px;
+  padding: 4px;
+  margin: 10px;
 }
 
 .stat-card span {
@@ -97,6 +107,8 @@ body {
 .stat-card strong {
   font-size: 2.4rem;
 }
+
+
 
 /* PROSPECT CARDS */
 

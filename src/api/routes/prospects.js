@@ -8,13 +8,14 @@ const router = express.Router();
 
 const ELITE_BASE_URL = "https://api.eliteprospects.com/v1";
 
+console.log("✅ Prospect routes loaded: /stats registered before /:eliteId");
+
 // Small pause helper so bulk sync does not hammer Elite's API.
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Maps either a thin /players record or richer /players/:id record
-// into the clean Mongo/UI shape we control.
+// Maps Elite player records into our clean Mongo/UI shape.
 function mapElitePlayer(player) {
   const latestStats = player.latestStats || {};
   const stats = latestStats.regularStats || {};
@@ -84,6 +85,7 @@ function mapElitePlayer(player) {
       player.links?.eliteprospectsUrl ||
       player._links?.eliteprospectsUrl ||
       null,
+
     eliteUpdatedAt: player.updatedAt || null,
 
     status: "Watch",
@@ -92,24 +94,20 @@ function mapElitePlayer(player) {
   };
 }
 
-// Preserves both our clean mapped fields AND the full Elite payload.
-// This is important while discovering what the API returns.
+// Preserves our mapped fields plus the raw Elite payload.
 function normalizeProspectForMongo(player) {
   const mapped = mapElitePlayer(player);
 
   return {
     eliteId: String(mapped.id),
     ...mapped,
-
     rawElite: player,
     rawEliteKeys: Object.keys(player || {}),
-
     syncedAt: new Date(),
   };
 }
 
 // Shared helper for one Elite /players page.
-// Used by both /sync and /sync-range.
 async function syncElitePage({ limit, offset }) {
   const query = new URLSearchParams({
     limit: String(limit),
@@ -126,9 +124,7 @@ async function syncElitePage({ limit, offset }) {
   );
 
   const response = await fetch(url, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers: { Accept: "application/json" },
   });
 
   const rawText = await response.text();
@@ -183,8 +179,84 @@ async function syncElitePage({ limit, offset }) {
   };
 }
 
-// Manual one-page sync.
-// Example: POST /api/prospects/sync?limit=100&offset=0
+// GET /api/prospects/stats
+// Dashboard database totals.
+// IMPORTANT: This must stay above router.get("/:eliteId").
+router.get("/stats", async (req, res) => {
+  try {
+    const total = await Prospect.countDocuments();
+
+    const uniqueIds = (await Prospect.distinct("eliteId")).filter(Boolean)
+      .length;
+
+    const enriched = await Prospect.countDocuments({
+      enriched: true,
+    });
+
+    const countries = (await Prospect.distinct("nationality")).filter(Boolean)
+      .length;
+
+    const duplicateGroups = await Prospect.aggregate([
+      {
+        $group: {
+          _id: "$eliteId",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $match: {
+          _id: { $ne: null },
+          count: { $gt: 1 },
+        },
+      },
+      {
+        $count: "duplicateCount",
+      },
+    ]);
+
+    res.json({
+      source: "mongo",
+      total,
+      uniqueIds,
+      enriched,
+      countries,
+      duplicateCount: duplicateGroups[0]?.duplicateCount || 0,
+    });
+  } catch (error) {
+    console.error("Prospect stats error:", error.message);
+
+    res.status(500).json({
+      error: "Stats unavailable",
+      message: error.message,
+    });
+  }
+});
+
+// GET /api/prospects/status-summary
+// Optional status breakdown endpoint.
+router.get("/status-summary", async (req, res) => {
+  try {
+    const statuses = await Prospect.aggregate([
+      {
+        $group: {
+          _id: "$statusText",
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+
+    res.json({ statuses });
+  } catch (error) {
+    res.status(500).json({
+      error: "Status summary unavailable",
+      message: error.message,
+    });
+  }
+});
+
+// POST /api/prospects/sync
+// Manual one-page Mongo import.
 router.post("/sync", async (req, res) => {
   try {
     const limit = Number(req.query.limit || 100);
@@ -219,9 +291,8 @@ router.post("/sync", async (req, res) => {
   }
 });
 
-// Controlled bulk importer.
-// Example: POST /api/prospects/sync-range?limit=100&start=0&pages=5
-// That imports 500 records using 5 Elite API calls.
+// POST /api/prospects/sync-range
+// Controlled importer for several pages.
 router.post("/sync-range", async (req, res) => {
   try {
     const limit = Number(req.query.limit || 100);
@@ -229,8 +300,6 @@ router.post("/sync-range", async (req, res) => {
     const pages = Number(req.query.pages || 1);
     const delayMs = Number(req.query.delayMs || 7000);
 
-    // Safety rails for the Explorer plan.
-    // Keeps us from accidentally burning the monthly quota.
     const safeLimit = Math.min(limit, 100);
     const safePages = Math.min(pages, 10);
 
@@ -260,12 +329,8 @@ router.post("/sync-range", async (req, res) => {
         apiReportedTotal = result.total;
       }
 
-      // Stop early if Elite returns an empty page.
-      if (result.fetched === 0) {
-        break;
-      }
+      if (result.fetched === 0) break;
 
-      // Delay between calls to respect 10 requests/minute.
       if (page < safePages - 1) {
         await sleep(delayMs);
       }
@@ -298,6 +363,8 @@ router.post("/sync-range", async (req, res) => {
   }
 });
 
+// GET /api/prospects
+// Mongo prospect list/search.
 router.get("/", async (req, res) => {
   try {
     const { q, league, team, position, limit = 50, page = 1 } = req.query;
@@ -305,11 +372,11 @@ router.get("/", async (req, res) => {
     const filter = {};
 
     if (q) {
-  filter.$or = [
-    { name: { $regex: q, $options: "i" } },
-    { nationality: { $regex: q, $options: "i" } },
-  ];
-}
+      filter.$or = [
+        { name: { $regex: q, $options: "i" } },
+        { nationality: { $regex: q, $options: "i" } },
+      ];
+    }
 
     if (league) filter.league = league;
     if (team) filter.team = team;
@@ -346,6 +413,8 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET /api/prospects/live
+// Live Elite list. Costs Elite API calls unless cached.
 router.get("/live", async (req, res) => {
   try {
     const limit = req.query.limit || 25;
@@ -363,9 +432,7 @@ router.get("/live", async (req, res) => {
     const response = await fetch(
       `${ELITE_BASE_URL}/players?limit=${limit}&status=active&yearOfBirth=2007&apiKey=${process.env.ELITE_PROSPECTS_API_KEY}`,
       {
-        headers: {
-          Accept: "application/json",
-        },
+        headers: { Accept: "application/json" },
       },
     );
 
@@ -401,8 +468,8 @@ router.get("/live", async (req, res) => {
   }
 });
 
-// Enrich one selected player with /players/:id detail data.
-// This intentionally costs one Elite call per selected player.
+// POST /api/prospects/enrich/:id
+// Enriches one player and saves detail to Mongo.
 router.post("/enrich/:id", async (req, res) => {
   try {
     const eliteId = req.params.id;
@@ -420,9 +487,7 @@ router.post("/enrich/:id", async (req, res) => {
     const response = await fetch(
       `${ELITE_BASE_URL}/players/${eliteId}?apiKey=${process.env.ELITE_PROSPECTS_API_KEY}`,
       {
-        headers: {
-          Accept: "application/json",
-        },
+        headers: { Accept: "application/json" },
       },
     );
 
@@ -483,6 +548,8 @@ router.post("/enrich/:id", async (req, res) => {
   }
 });
 
+// GET /api/prospects/live/:id
+// Live Elite player detail. Does not read Mongo.
 router.get("/live/:id", async (req, res) => {
   try {
     const cacheKey = `live-player-${req.params.id}`;
@@ -498,9 +565,7 @@ router.get("/live/:id", async (req, res) => {
     const response = await fetch(
       `${ELITE_BASE_URL}/players/${req.params.id}?apiKey=${process.env.ELITE_PROSPECTS_API_KEY}`,
       {
-        headers: {
-          Accept: "application/json",
-        },
+        headers: { Accept: "application/json" },
       },
     );
 
@@ -526,6 +591,8 @@ router.get("/live/:id", async (req, res) => {
   }
 });
 
+// GET /api/prospects/probe
+// Debug helper for testing Elite API responses.
 router.get("/probe", async (req, res) => {
   try {
     const query = new URLSearchParams({
@@ -541,9 +608,7 @@ router.get("/probe", async (req, res) => {
     );
 
     const response = await fetch(url, {
-      headers: {
-        Accept: "application/json",
-      },
+      headers: { Accept: "application/json" },
     });
 
     const data = await response.json();
@@ -560,6 +625,8 @@ router.get("/probe", async (req, res) => {
   }
 });
 
+// GET /api/prospects/:eliteId
+// Keep this LAST because it catches any single path segment.
 router.get("/:eliteId", async (req, res) => {
   try {
     const player = await Prospect.findOne({
@@ -579,4 +646,5 @@ router.get("/:eliteId", async (req, res) => {
     });
   }
 });
+
 export default router;
