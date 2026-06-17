@@ -84,7 +84,7 @@ function mapElitePlayer(player) {
       player.links?.eliteprospectsUrl ||
       player._links?.eliteprospectsUrl ||
       null,
-    updatedAt: player.updatedAt || null,
+    eliteUpdatedAt: player.updatedAt || null,
 
     status: "Watch",
     upside: "Medium",
@@ -159,10 +159,7 @@ async function syncElitePage({ limit, offset }) {
           enriched: { $ne: true },
         },
         update: {
-          $setOnInsert: prospect,
-          $set: {
-            syncedAt: new Date(),
-          },
+          $set: prospect,
         },
         upsert: true,
       },

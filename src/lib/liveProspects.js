@@ -18,11 +18,38 @@ export async function loadProspects(limit = 100, page = 1) {
 }
 
 export async function loadProspectById(id) {
-  const response = await fetch(`${API_BASE}/api/prospects/${id}`);
+  const response = await fetch(
+    `${API_BASE}/api/prospects/${id}`
+  );
 
   if (!response.ok) {
     throw new Error("Mongo prospect detail unavailable");
   }
+
+  const data = await response.json();
+
+  console.log("MONGO DETAIL RESPONSE:", data);
+
+  return data;
+}
+
+export async function searchProspects(query, limit = 100) {
+  const response = await fetch(
+    `${API_BASE}/api/prospects?q=${encodeURIComponent(query)}&limit=${limit}`
+  );
+
+  if (!response.ok) throw new Error("Prospect search unavailable");
+
+  const data = await response.json();
+  return data.players || [];
+}
+
+export async function enrichProspectById(id) {
+  const response = await fetch(`${API_BASE}/api/prospects/enrich/${id}`, {
+    method: "POST",
+  });
+
+  if (!response.ok) throw new Error("Prospect enrich unavailable");
 
   return await response.json();
 }

@@ -49,7 +49,7 @@ const prospectSchema = new mongoose.Schema(
 
     imageUrl: String,
     eliteUrl: String,
-    updatedAt: String,
+    eliteUpdatedAt: String,
 
     // Store the full Elite Prospects response
     rawElite: mongoose.Schema.Types.Mixed,
