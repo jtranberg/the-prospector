@@ -338,6 +338,26 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/:eliteId", async (req, res) => {
+  try {
+    const player = await Prospect.findOne({
+      eliteId: String(req.params.eliteId),
+    }).lean();
+
+    if (!player) {
+      return res.status(404).json({
+        error: "Prospect not found",
+      });
+    }
+
+    res.json(player);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
 router.get("/live", async (req, res) => {
   try {
     const limit = req.query.limit || 25;

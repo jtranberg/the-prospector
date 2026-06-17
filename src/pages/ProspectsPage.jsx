@@ -9,19 +9,16 @@ function ProspectsPage({ prospects = [] }) {
 
   const topProspect = prospects.reduce((best, player) => {
     if (!best) return player;
-
     return getProspectScore(player) > getProspectScore(best) ? player : best;
   }, null);
 
   const topScorer = prospects.reduce((best, player) => {
     if (!best) return player;
-
     return (player.points ?? 0) > (best.points ?? 0) ? player : best;
   }, null);
 
   const topPPG = prospects.reduce((best, player) => {
     if (!best) return player;
-
     return getPPG(player) > getPPG(best) ? player : best;
   }, null);
 
@@ -33,13 +30,13 @@ function ProspectsPage({ prospects = [] }) {
         <h1>Prospect Database</h1>
 
         <p>
-          Active 2007-born prospects powered by the live Elite Prospects API,
-          cached through Little Prospector for faster scouting review.
+          MongoDB-backed prospect database synced from Elite Prospects, with
+          local search and selected player enrichment.
         </p>
       </section>
 
       <section className="stats-grid">
-        <StatCard label="Active Prospects" value={activeProspects.length} />
+        <StatCard label="Mongo Prospects" value={activeProspects.length} />
         <StatCard
           label="Top Prospect"
           value={topProspect ? getProspectScore(topProspect) : 0}
@@ -56,11 +53,11 @@ function ProspectsPage({ prospects = [] }) {
 
       <section className="dashboard-card">
         <div className="section-header">
-          <h2>All Active Prospects</h2>
+          <h2>All Synced Prospects</h2>
 
           <p>
-            Birth Year 2007 • Active players • Live data with cached player
-            detail lookups.
+            Local Mongo records • Elite Prospects source • Detail enrichment
+            available for selected players.
           </p>
         </div>
 

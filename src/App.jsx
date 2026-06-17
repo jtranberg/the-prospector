@@ -6,7 +6,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ProspectsPage from "./pages/ProspectsPage";
 
 import { loadCsvProspects } from "./lib/prospectMapper";
-import { loadLiveProspects } from "./lib/liveProspects";
+import { loadProspects } from "./lib/liveProspects";
 import { getProspectScore } from "./lib/prospectScoring";
 
 const csvProspects = loadCsvProspects();
@@ -15,19 +15,19 @@ function App() {
   const [prospects, setProspects] = useState(csvProspects);
 
   useEffect(() => {
-    async function loadProspects() {
+    async function loadMongoProspects() {
       try {
-        const livePlayers = await loadLiveProspects();
+        const mongoPlayers = await loadProspects(100);
 
-        if (livePlayers.length > 0) {
-          setProspects(livePlayers);
+        if (mongoPlayers.length > 0) {
+          setProspects(mongoPlayers);
         }
       } catch (error) {
         console.error("Using CSV fallback:", error.message);
       }
     }
 
-    loadProspects();
+    loadMongoProspects();
   }, []);
 
   const rankedProspects = [...prospects].sort(

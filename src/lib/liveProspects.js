@@ -1,33 +1,18 @@
-export async function loadLiveProspects() {
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5050";
+
+export async function loadProspects(limit = 100, page = 1) {
   const response = await fetch(
-    "http://localhost:5050/api/prospects/live?limit=10"
+    `${API_BASE}/api/prospects?limit=${limit}&page=${page}`
   );
 
   if (!response.ok) {
-    throw new Error("Live prospects unavailable");
+    throw new Error("Mongo prospects unavailable");
   }
 
   const data = await response.json();
 
-  console.log("LIVE PROSPECTS RESPONSE:", data);
+  console.log("MONGO PROSPECTS RESPONSE:", data);
 
   return data.players || [];
-}
-
-export async function loadLiveProspectById(id) {
-  console.log("LOADING PLAYER ID:", id);
-
-  const response = await fetch(
-    `http://localhost:5050/api/prospects/live/${id}`
-  );
-
-  if (!response.ok) {
-    throw new Error("Live prospect detail unavailable");
-  }
-
-  const data = await response.json();
-
-  console.log("DETAIL RESPONSE:", data);
-
-  return data.player || data;
 }
