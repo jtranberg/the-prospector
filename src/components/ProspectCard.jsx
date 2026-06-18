@@ -146,6 +146,22 @@ function getScoreClass(score) {
   return "score-low";
 }
 
+function getCardTier(score) {
+  if (score >= 90) return "platinum";
+  if (score >= 80) return "diamond";
+  if (score >= 60) return "gold";
+  if (score >= 40) return "silver";
+  return "bronze";
+}
+
+function getTierLabel(score) {
+  if (score >= 90) return "👑 Platinum Elite";
+  if (score >= 80) return "💎 Diamond Target";
+  if (score >= 60) return "🏅 Gold Prospect";
+  if (score >= 40) return "🥈 Silver Watch";
+  return "🥉 Bronze File";
+}
+
 // Keeps gauge values between 0 and 100.
 function clampGauge(value) {
   return Math.max(0, Math.min(100, Math.round(value)));
@@ -238,22 +254,41 @@ function ProspectCard({ player, getProspectScore }) {
     }
   }
 
+  const cardTier = getCardTier(score);
+  const tierLabel = getTierLabel(score);
+
   return (
-    <div className="prospect-card">
-      <div className="prospect-card-top">
-        <div>
-          <p className="prospect-league">
-            {activePlayer.league || "Unknown League"}
-          </p>
+    <div className={`prospect-card hockey-card ${cardTier}`}>
+      <div className="hockey-card-inner">
+        <div className="hockey-card-ribbon">{tierLabel}</div>
 
+        <div className="hockey-card-photo">
+          {activePlayer.imageUrl?.length > 0 ? (
+            <img
+              src={activePlayer.imageUrl}
+              alt={activePlayer.name || "Player"}
+            />
+          ) : (
+            <div className="hockey-card-placeholder">🏒</div>
+          )}
+
+          <div className={`hockey-card-score ${getScoreClass(score)}`}>
+            <span>Score</span>
+            <strong>{score}</strong>
+          </div>
+        </div>
+
+        <div className="hockey-card-nameplate">
+          <p>{activePlayer.league || "Unknown League"}</p>
           <h3>{activePlayer.name || "Unknown Player"}</h3>
-
-          <p className="prospect-team">
+          <span>
             {activePlayer.team || "Unknown Team"} •{" "}
             {activePlayer.position || "N/A"}
-          </p>
+          </span>
+        </div>
 
-          <p className="prospect-team nationality-row">
+        <div className="hockey-card-meta">
+          <span>
             {flagUrl && (
               <img
                 src={flagUrl}
@@ -261,191 +296,284 @@ function ProspectCard({ player, getProspectScore }) {
                 className="country-flag"
               />
             )}
+            {formatValue(activePlayer.nationality, "N/A")}
+          </span>
 
-            {formatValue(activePlayer.nationality, "Nationality unavailable")} •
-            Age {formatAge(activePlayer)}
-          </p>
+          <span>Age {formatAge(activePlayer)}</span>
+          <span>{formatHeight(activePlayer)}</span>
+          <span>{formatWeight(activePlayer)}</span>
         </div>
 
-        <div className={`prospect-score ${getScoreClass(score)}`}>
-          <span>Score</span>
-          <strong>{score}</strong>
+        <div className="hockey-card-stats">
+          <div>
+            <span>GP</span>
+            <strong>{activePlayer.games ?? 0}</strong>
+          </div>
 
-          <button
-            className="intel-button"
-            type="button"
-            onClick={() => setManualFormOpen((open) => !open)}
-          >
-            {manualFormOpen ? "Close Intel" : "Add Scout Intel ⭐"}
-          </button>
+          <div>
+            <span>G</span>
+            <strong>{activePlayer.goals ?? 0}</strong>
+          </div>
+
+          <div>
+            <span>A</span>
+            <strong>{activePlayer.assists ?? 0}</strong>
+          </div>
+
+          <div>
+            <span>PTS</span>
+            <strong>{activePlayer.points ?? 0}</strong>
+          </div>
+
+          <div>
+            <span>PPG</span>
+            <strong>{getPPG(activePlayer)}</strong>
+          </div>
         </div>
+
+        <div className="hockey-card-badges">
+          <span>{intelBadge}</span>
+          <span>{decision}</span>
+          <span>{activePlayer.enriched ? "Verified File" : "Basic File"}</span>
+        </div>
+
+        <div className="scout-note hockey-card-note">
+          <span>Scout Recommendation</span>
+          <p>{scoutNote}</p>
+        </div>
+
+        <button
+          className="intel-button"
+          type="button"
+          onClick={() => setManualFormOpen((open) => !open)}
+        >
+          {manualFormOpen ? "Close Intel" : "Add Scout Intel ⭐"}
+        </button>
       </div>
 
-      <div className="prospect-footer">
-        <span className="status-pill">{decision}</span>
+      <details className="hockey-card-details" open>
+        <summary>Full Scouting File</summary>
 
-        <span className="upside-pill">
-          {activePlayer.enriched ? "Enriched" : "Basic"} Profile
-        </span>
+        <div className="prospect-footer">
+          <span className="status-pill">{decision}</span>
 
-        <span className="upside-pill">
-          {ppg >= 1 ? "High Production" : "Developing"}
-        </span>
-      </div>
+          <span className="upside-pill">
+            {activePlayer.enriched ? "Enriched" : "Basic"} Profile
+          </span>
 
-      <div className="prospect-stats">
-        <div>
-          <span>Intel Badge</span>
-          <strong>{intelBadge}</strong>
+          <span className="upside-pill">
+            {ppg >= 1 ? "High Production" : "Developing"}
+          </span>
         </div>
 
-        <div>
-          <span>Card XP</span>
-          <strong>+{cardXP}</strong>
+        <div className="prospect-stats">
+          <div>
+            <span>Intel Badge</span>
+            <strong>{intelBadge}</strong>
+          </div>
+
+          <div>
+            <span>Card XP</span>
+            <strong>+{cardXP}</strong>
+          </div>
+
+          <div>
+            <span>Data Quality</span>
+            <strong>{dataQuality}%</strong>
+          </div>
+
+          <div>
+            <span>Signal</span>
+            <strong>{ppg >= 1 ? "Production" : "Tracking"}</strong>
+          </div>
+
+          <div>
+            <span>Review Path</span>
+            <strong>{decision}</strong>
+          </div>
         </div>
 
-        <div>
-          <span>Data Quality</span>
-          <strong>{dataQuality}%</strong>
+        <div className="prospect-stats">
+          <div>
+            <span>GP</span>
+            <strong>{activePlayer.games ?? 0}</strong>
+          </div>
+
+          <div>
+            <span>G</span>
+            <strong>{activePlayer.goals ?? 0}</strong>
+          </div>
+
+          <div>
+            <span>A</span>
+            <strong>{activePlayer.assists ?? 0}</strong>
+          </div>
+
+          <div>
+            <span>PTS</span>
+            <strong>{activePlayer.points ?? 0}</strong>
+          </div>
+
+          <div>
+            <span>PPG</span>
+            <strong>{getPPG(activePlayer)}</strong>
+          </div>
+
+          <div>
+            <span>PIM</span>
+            <strong>{activePlayer.pim ?? 0}</strong>
+          </div>
         </div>
 
-        <div>
-          <span>Signal</span>
-          <strong>{ppg >= 1 ? "Production" : "Tracking"}</strong>
+        <div className="prospect-stats">
+          <div>
+            <span>Height</span>
+            <strong>{formatHeight(activePlayer)}</strong>
+          </div>
+
+          <div>
+            <span>Weight</span>
+            <strong>{formatWeight(activePlayer)}</strong>
+          </div>
+
+          <div>
+            <span>Shoots</span>
+            <strong>{formatShoots(activePlayer)}</strong>
+          </div>
+
+          <div>
+            <span>Plus/Minus</span>
+            <strong>{formatPlusMinus(activePlayer)}</strong>
+          </div>
         </div>
 
-        <div>
-          <span>Review Path</span>
-          <strong>{decision}</strong>
-        </div>
-      </div>
+        <div className="prospect-stats">
+          <div>
+            <span>Birthplace</span>
+            <strong>{activePlayer.placeOfBirth || "N/A"}</strong>
+          </div>
 
-      <div className="prospect-stats">
-        <div>
-          <span>GP</span>
-          <strong>{activePlayer.games ?? 0}</strong>
-        </div>
+          <div>
+            <span>Birth Year</span>
+            <strong>{formatBirthYear(activePlayer)}</strong>
+          </div>
 
-        <div>
-          <span>G</span>
-          <strong>{activePlayer.goals ?? 0}</strong>
-        </div>
+          <div>
+            <span>DOB</span>
+            <strong>{formatDateOfBirth(activePlayer)}</strong>
+          </div>
 
-        <div>
-          <span>A</span>
-          <strong>{activePlayer.assists ?? 0}</strong>
-        </div>
-
-        <div>
-          <span>PTS</span>
-          <strong>{activePlayer.points ?? 0}</strong>
+          <div>
+            <span>Age</span>
+            <strong>{formatAge(activePlayer)}</strong>
+          </div>
         </div>
 
-        <div>
-          <span>PPG</span>
-          <strong>{getPPG(activePlayer)}</strong>
+        <div className="prospect-stats">
+          <div>
+            <span>Season</span>
+            <strong>{activePlayer.season || "N/A"}</strong>
+          </div>
+
+          <div>
+            <span>League Level</span>
+            <strong>{activePlayer.leagueLevel || "N/A"}</strong>
+          </div>
+
+          <div>
+            <span>League Type</span>
+            <strong>{activePlayer.leagueType || "N/A"}</strong>
+          </div>
+
+          <div>
+            <span>Team Country</span>
+            <strong>{activePlayer.teamCountry || "N/A"}</strong>
+          </div>
         </div>
 
-        <div>
-          <span>PIM</span>
-          <strong>{activePlayer.pim ?? 0}</strong>
-        </div>
-      </div>
+        <div className="prospect-stats">
+          <div>
+            <span>Game Status</span>
+            <strong>{activePlayer.gameStatus || "N/A"}</strong>
+          </div>
 
-      <div className="prospect-stats">
-        <div>
-          <span>Height</span>
-          <strong>{formatHeight(activePlayer)}</strong>
-        </div>
+          <div>
+            <span>Jersey</span>
+            <strong>{formatJersey(activePlayer)}</strong>
+          </div>
 
-        <div>
-          <span>Weight</span>
-          <strong>{formatWeight(activePlayer)}</strong>
-        </div>
+          <div>
+            <span>Elite ID</span>
+            <strong>{activePlayer.eliteId || activePlayer.id || "N/A"}</strong>
+          </div>
 
-        <div>
-          <span>Shoots</span>
-          <strong>{formatShoots(activePlayer)}</strong>
-        </div>
-
-        <div>
-          <span>Plus/Minus</span>
-          <strong>{formatPlusMinus(activePlayer)}</strong>
-        </div>
-      </div>
-
-      <div className="prospect-stats">
-        <div>
-          <span>Birthplace</span>
-          <strong>{activePlayer.placeOfBirth || "N/A"}</strong>
+          <div>
+            <span>Source</span>
+            <strong>
+              {activePlayer.source === "elite_prospects" ? "Elite" : "CSV"}
+            </strong>
+          </div>
         </div>
 
-        <div>
-          <span>Birth Year</span>
-          <strong>{formatBirthYear(activePlayer)}</strong>
+        <div className="scout-note">
+          <span>Scout Recommendation</span>
+          <p>{scoutNote}</p>
         </div>
 
-        <div>
-          <span>DOB</span>
-          <strong>{formatDateOfBirth(activePlayer)}</strong>
+        <div className="prospect-footer">
+          <span className="status-pill">{activePlayer.status || "Watch"}</span>
+
+          <span className="upside-pill">
+            {activePlayer.upside || "Medium"} Upside
+          </span>
         </div>
 
-        <div>
-          <span>Age</span>
-          <strong>{formatAge(activePlayer)}</strong>
-        </div>
-      </div>
+        <div className="hockey-gauge-grid">
+          <div className="hockey-gauge-card">
+            <div className="radial-gauge" style={{ "--value": scoreGauge }}>
+              <span>{scoreGauge}</span>
+            </div>
 
-      <div className="prospect-stats">
-        <div>
-          <span>Season</span>
-          <strong>{activePlayer.season || "N/A"}</strong>
-        </div>
+            <strong>Draft Signal</strong>
+            <small>{decision}</small>
+          </div>
 
-        <div>
-          <span>League Level</span>
-          <strong>{activePlayer.leagueLevel || "N/A"}</strong>
-        </div>
+          <div className="hockey-gauge-card">
+            <div
+              className="radial-gauge"
+              style={{ "--value": productionGauge }}
+            >
+              <span>{productionGauge}%</span>
+            </div>
 
-        <div>
-          <span>League Type</span>
-          <strong>{activePlayer.leagueType || "N/A"}</strong>
-        </div>
+            <strong>Production</strong>
+            <small>{getPPG(activePlayer)} PPG</small>
+          </div>
 
-        <div>
-          <span>Team Country</span>
-          <strong>{activePlayer.teamCountry || "N/A"}</strong>
-        </div>
-      </div>
+          <div className="hockey-gauge-card">
+            <div className="radial-gauge" style={{ "--value": qualityGauge }}>
+              <span>{qualityGauge}%</span>
+            </div>
 
-      <div className="prospect-stats">
-        <div>
-          <span>Game Status</span>
-          <strong>{activePlayer.gameStatus || "N/A"}</strong>
-        </div>
+            <strong>Intel Quality</strong>
+            <small>
+              {activePlayer.enriched ? "Verified file" : "Needs enrich"}
+            </small>
+          </div>
 
-        <div>
-          <span>Jersey</span>
-          <strong>{formatJersey(activePlayer)}</strong>
-        </div>
+          <div className="hockey-gauge-card">
+            <div
+              className="radial-gauge"
+              style={{ "--value": clampGauge(cardXP) }}
+            >
+              <span>{cardXP}</span>
+            </div>
 
-        <div>
-          <span>Elite ID</span>
-          <strong>{activePlayer.eliteId || activePlayer.id || "N/A"}</strong>
+            <strong>Scout XP</strong>
+            <small>{xpLevel}</small>
+          </div>
         </div>
-
-        <div>
-          <span>Source</span>
-          <strong>
-            {activePlayer.source === "elite_prospects" ? "Elite" : "CSV"}
-          </strong>
-        </div>
-      </div>
-
-      <div className="scout-note">
-        <span>Scout Recommendation</span>
-        <p>{scoutNote}</p>
-      </div>
+      </details>
 
       {manualFormOpen && (
         <div className="scout-intel-panel">
@@ -585,57 +713,6 @@ function ProspectCard({ player, getProspectScore }) {
           <p>{activePlayer.manualNotes}</p>
         </div>
       )}
-
-      <div className="prospect-footer">
-        <span className="status-pill">{activePlayer.status || "Watch"}</span>
-
-        <span className="upside-pill">
-          {activePlayer.upside || "Medium"} Upside
-        </span>
-      </div>
-
-      <div className="hockey-gauge-grid">
-        <div className="hockey-gauge-card">
-          <div className="radial-gauge" style={{ "--value": scoreGauge }}>
-            <span>{scoreGauge}</span>
-          </div>
-
-          <strong>Draft Signal</strong>
-          <small>{decision}</small>
-        </div>
-
-        <div className="hockey-gauge-card">
-          <div className="radial-gauge" style={{ "--value": productionGauge }}>
-            <span>{productionGauge}%</span>
-          </div>
-
-          <strong>Production</strong>
-          <small>{getPPG(activePlayer)} PPG</small>
-        </div>
-
-        <div className="hockey-gauge-card">
-          <div className="radial-gauge" style={{ "--value": qualityGauge }}>
-            <span>{qualityGauge}%</span>
-          </div>
-
-          <strong>Intel Quality</strong>
-          <small>
-            {activePlayer.enriched ? "Verified file" : "Needs enrich"}
-          </small>
-        </div>
-
-        <div className="hockey-gauge-card">
-          <div
-            className="radial-gauge"
-            style={{ "--value": clampGauge(cardXP) }}
-          >
-            <span>{cardXP}</span>
-          </div>
-
-          <strong>Scout XP</strong>
-          <small>{xpLevel}</small>
-        </div>
-      </div>
     </div>
   );
 }

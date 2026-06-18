@@ -1,5 +1,7 @@
 import { getPPG } from "../lib/prospectScoring";
 
+const COUNTRY_LIMIT = 20;
+
 function getTopLoadedProspects(prospects, getProspectScore) {
   return [...prospects]
     .map((player) => ({
@@ -11,23 +13,42 @@ function getTopLoadedProspects(prospects, getProspectScore) {
     .slice(0, 6);
 }
 
-function getCountryPipeline(prospects) {
-  const countryCounts = {};
+function getCountryPipelineFromStats(nationalities, limit = COUNTRY_LIMIT) {
+  const sortedCountries = [...nationalities]
+    .map((item) => ({
+      country: item.nationality || item.country || "Unknown",
+      count: item.count || 0,
+    }))
+    .sort((a, b) => b.count - a.count);
 
-  prospects.forEach((player) => {
-    const country = player.nationality || "Unknown";
-    countryCounts[country] = (countryCounts[country] || 0) + 1;
-  });
+  const topCountries = sortedCountries.slice(0, limit);
+  const otherCountries = sortedCountries.slice(limit);
 
-  return Object.entries(countryCounts)
-    .map(([country, count]) => ({ country, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 6);
+  const otherCount = otherCountries.reduce(
+    (total, item) => total + item.count,
+    0,
+  );
+
+  if (otherCount > 0) {
+    topCountries.push({
+      country: `Other ${otherCountries.length} Countries Combined`,
+      count: otherCount,
+    });
+  }
+
+  return topCountries;
 }
 
-function ProspectCharts({ prospects = [], getProspectScore }) {
+function ProspectCharts({
+  prospects = [],
+  nationalityStats = [],
+  getProspectScore,
+}) {
   const topProspects = getTopLoadedProspects(prospects, getProspectScore);
-  const countryPipeline = getCountryPipeline(prospects);
+  const countryPipeline = getCountryPipelineFromStats(nationalityStats);
+
+  console.log("Prospects loaded:", prospects.length);
+  console.log("Nationality stats loaded:", nationalityStats.length);
 
   const maxCountryCount = Math.max(
     ...countryPipeline.map((item) => item.count),
@@ -63,8 +84,11 @@ function ProspectCharts({ prospects = [], getProspectScore }) {
 
       <div className="chart-card hockey-chart-card">
         <div className="section-header">
-          <h3>Country Pipeline</h3>
-          <p>Loaded review set grouped by prospect nationality.</p>
+          <h3>Global Prospect Pipeline</h3>
+          <p>
+            Top nationality pipelines from the full database, with remaining
+            countries grouped together.
+          </p>
         </div>
 
         <div className="country-pipeline-list">

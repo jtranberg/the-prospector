@@ -87,3 +87,29 @@ export async function loadProspectStats() {
 
   return data;
 }
+
+export async function loadNationalityStats() {
+  const url = `${API_BASE}/api/prospects/stats/nationalities`;
+
+  console.log("LOADING NATIONALITY STATS FROM:", url);
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    const text = await response.text();
+
+    console.error("NATIONALITY STATS REQUEST FAILED:", {
+      url,
+      status: response.status,
+      body: text,
+    });
+
+    throw new Error("Nationality stats unavailable");
+  }
+
+  const data = await response.json();
+
+  console.log("NATIONALITY STATS RESPONSE:", data);
+
+  return data.nationalities || [];
+}

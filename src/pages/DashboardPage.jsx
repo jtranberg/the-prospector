@@ -11,6 +11,7 @@ import {
   searchProspects,
   enrichProspectById,
   loadProspectStats,
+  loadNationalityStats,
 } from "../lib/liveProspects";
 
 function getDatabaseMilestone(total) {
@@ -51,6 +52,8 @@ function DashboardPage({ prospects = [] }) {
   const selectableProspects = hasSearched ? searchResults : prospects;
 
   const totalSearchPages = searchTotal ? Math.ceil(searchTotal / 100) : 1;
+
+  const [nationalityStats, setNationalityStats] = useState([]);
 
   const dbPlayerCount = dbStats?.total ?? null;
   const playerCountDisplay = statsError
@@ -144,6 +147,8 @@ function DashboardPage({ prospects = [] }) {
 
   useEffect(() => {
     async function loadStats() {
+      const nationalityData = await loadNationalityStats();
+      setNationalityStats(nationalityData);
       try {
         setStatsError(false);
 
@@ -254,13 +259,13 @@ function DashboardPage({ prospects = [] }) {
   return (
     <main className="app-shell">
       <a
-  href="https://appintelligence.ca"
-  target="_blank"
-  rel="noreferrer"
-  className="ai-badge"
->
-  Powered by App Intelligence
-</a>
+        href="https://appintelligence.ca"
+        target="_blank"
+        rel="noreferrer"
+        className="ai-badge"
+      >
+        Powered by App Intelligence
+      </a>
       <section className="hero">
         <p className="eyebrow">Global Hockey Intelligence</p>
 
@@ -621,36 +626,30 @@ function DashboardPage({ prospects = [] }) {
       )}
 
       <ProspectCharts
-        prospects={intelligence.scoredProspects}
-        getProspectScore={getProspectScore}
-      />
+  prospects={prospects}
+  nationalityStats={nationalityStats}
+  getProspectScore={getProspectScore}
+/>
       <footer className="dashboard-footer">
-  <div>
-    <strong>The Prospector  </strong>
-    <span>
-      Global Hockey Intelligence Platform
-    </span>
-  </div>
+        <div>
+          <strong>The Prospector </strong>
+          <span>Global Hockey Intelligence Platform</span>
+        </div>
 
-  <div>
-    <span>
-      {dbPlayerCount?.toLocaleString() || "0"} Prospects •{" "}
-      {dbCountries || 0} Countries
-    </span>
-  </div>
+        <div>
+          <span>
+            {dbPlayerCount?.toLocaleString() || "0"} Prospects •{" "}
+            {dbCountries || 0} Countries
+          </span>
+        </div>
 
-  <div>
-    <a
-      href="https://appintelligence.ca"
-      target="_blank"
-      rel="noreferrer"
-    >
-      Built by App Intelligence
-    </a>
-  </div>
-</footer>
+        <div>
+          <a href="https://appintelligence.ca" target="_blank" rel="noreferrer">
+            Built by App Intelligence
+          </a>
+        </div>
+      </footer>
     </main>
-    
   );
 }
 

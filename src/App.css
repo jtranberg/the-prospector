@@ -8,7 +8,7 @@ body {
     radial-gradient(
       circle at top left,
       rgba(42, 114, 255, 0.22),
-      transparent 32%
+      transparent 40%
     ),
     linear-gradient(135deg, #0c2851, #14253cd8 55%, #050e20);
   color: #f8fafc;
@@ -170,6 +170,7 @@ body {
   padding: 10px;
   border-radius: 18px;
   margin-bottom: 10px;
+  
 }
 
 .prospect-score.score-low {
@@ -180,6 +181,7 @@ body {
 .prospect-score.score-watch {
   border: 1px solid rgba(245, 158, 11, 0.35);
   background: rgba(11, 245, 81, 0.384);
+  font-size: 5rem;
 }
 
 .prospect-score.score-good {
@@ -196,6 +198,27 @@ body {
   border: 1px solid rgba(250, 204, 21, 0.55);
   background: rgba(249, 205, 8, 0.473);
   box-shadow: 0 0 24px rgba(250, 204, 21, 0.18);
+}
+.hockey-card-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 120px;
+}
+
+.hockey-card-score span {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.hockey-card-score strong {
+  font-size: 4rem;
+  line-height: 1;
+  font-weight: 700;
+  
 }
 
 .prospect-score span {
@@ -220,19 +243,20 @@ body {
   min-width: 0;
   padding: 10px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(164, 187, 202, 0.87);
   text-align: center;
 }
 
 .prospect-stats span {
   display: block;
   margin-bottom: 6px;
-  color: #94a3b8;
+  color: #2d3643;
   font-size: 0.72rem;
 }
 
 .prospect-stats strong {
   font-size: 1rem;
+ 
 }
 
 .prospect-footer {
@@ -1385,3 +1409,53 @@ td small {
   box-shadow: 0 0 20px rgba(0, 195, 255, 0.25);
 }
 
+/* card types */
+.prospect-card.platinum {
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #d7d7d7,
+      #ffffff
+    );
+  border: 3px solid #f5f5f5;
+  box-shadow:
+    0 0 30px rgba(255,255,255,.4);
+}
+
+.prospect-card.diamond {
+  background:
+    linear-gradient(
+      135deg,
+      #67e8f9,
+      #818cf8,
+      #ec4899
+    );
+}
+
+.prospect-card.gold {
+  background:
+    linear-gradient(
+      135deg,
+      #ffd700,
+      #ffb300
+    );
+}
+
+.prospect-card.silver {
+  background:
+    linear-gradient(
+      135deg,
+      #a6a3a3,
+      #6e6c6c
+    );
+}
+
+.prospect-card.bronze {
+  background:
+    linear-gradient(
+      135deg,
+      #896138,
+      #4e3015
+    );
+}
