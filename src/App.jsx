@@ -31,18 +31,26 @@ function App() {
   }, []);
 
   const rankedProspects = [...prospects].sort(
-    (a, b) => getProspectScore(b) - getProspectScore(a)
+    (a, b) => getProspectScore(b) - getProspectScore(a),
   );
 
   return (
     <>
       <nav className="top-nav">
-        <Link to="/">Dashboard</Link>
-        <Link to="/prospects">Prospect Database</Link>
+        <Link to="/" className="nav-pill">
+          Dashboard
+        </Link>
+
+        <Link to="/prospects" className="nav-pill">
+          Prospect Database
+        </Link>
       </nav>
 
       <Routes>
-        <Route path="/" element={<DashboardPage prospects={rankedProspects} />} />
+        <Route
+          path="/"
+          element={<DashboardPage prospects={rankedProspects} />}
+        />
 
         <Route
           path="/prospects"

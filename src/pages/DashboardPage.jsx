@@ -13,29 +13,36 @@ import {
   loadProspectStats,
 } from "../lib/liveProspects";
 
+function getDatabaseMilestone(total) {
+  if (!total) return "Building Dataset";
+  if (total >= 100000) return "Global Pro Network";
+  if (total >= 70000) return "Elite Global Board";
+  if (total >= 50000) return "Major Scout Database";
+  return "Prospect Builder";
+}
+
+function getPipelineHealth(coveragePercent) {
+  if (coveragePercent >= 80) return "Game Ready";
+  if (coveragePercent >= 50) return "Strong Board";
+  if (coveragePercent >= 25) return "Building Intel";
+  return "Needs More Enrichment";
+}
+
 function DashboardPage({ prospects = [] }) {
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
   const [selectedPlayerDetail, setSelectedPlayerDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
-  // Database-level stats come from /api/prospects/stats.
-  // These represent the real MongoDB collection, not just the loaded page list.
   const [dbStats, setDbStats] = useState(null);
   const [statsError, setStatsError] = useState(false);
 
-  // Search state controls the prospect selector.
-  // When search results exist, the dropdown switches to those results.
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
-  // Enrichment state gives the button a proper loading state.
   const [enrichLoading, setEnrichLoading] = useState(false);
 
-  // Search results become the active working list when present.
-  // Otherwise we use the loaded prospects passed into the dashboard.
   const selectableProspects = searchResults.length ? searchResults : prospects;
 
-  // True Mongo player count.
   const dbPlayerCount = dbStats?.total ?? null;
   const playerCountDisplay = statsError
     ? "Unavailable"
@@ -44,22 +51,16 @@ function DashboardPage({ prospects = [] }) {
   const loadedPlayerCount = prospects.length;
   const searchResultCount = searchResults.length;
 
-  // Selected player can come from search results or the default loaded list.
   const selectedPlayer = selectableProspects.find(
     (player) =>
       String(player.eliteId || player.id) === String(selectedPlayerId),
   );
 
-  // If full Mongo detail has been loaded, use it.
-  // Otherwise show the lighter selected player record.
   const displayPlayer = selectedPlayerDetail || selectedPlayer;
 
-  // Scout XP is currently based on loaded records.
-  // Later this can become DB-level reviewed/enriched totals.
   const scoutXP = getScoutXP(prospects);
   const scoutLevel = getScoutLevel(scoutXP);
 
-  // Turns raw prospect records into dashboard intelligence.
   const intelligence = useMemo(() => {
     const scoredProspects = prospects.map((player) => {
       const score = getProspectScore(player);
@@ -93,16 +94,6 @@ function DashboardPage({ prospects = [] }) {
       return player.scoutScore > best.scoutScore ? player : best;
     }, null);
 
-    const topScorer = scoredProspects.reduce((best, player) => {
-      if (!best) return player;
-      return (player.points ?? 0) > (best.points ?? 0) ? player : best;
-    }, null);
-
-    const bestPPG = scoredProspects.reduce((best, player) => {
-      if (!best) return player;
-      return player.scoutPPG > best.scoutPPG ? player : best;
-    }, null);
-
     const enrichedCount = scoredProspects.filter((player) => player.enriched)
       .length;
 
@@ -117,24 +108,30 @@ function DashboardPage({ prospects = [] }) {
       needsData,
       hiddenGems,
       topProspect,
-      topScorer,
-      bestPPG,
       enrichedCount,
       coveragePercent,
     };
   }, [prospects, loadedPlayerCount]);
 
+  const dbEnriched = dbStats?.enriched ?? 0;
+  const dbCountries = dbStats?.countries ?? "Loading...";
+  const dbDuplicates = dbStats?.duplicateCount ?? 0;
+
+  const dbCoveragePercent =
+    dbPlayerCount && dbEnriched
+      ? Math.round((dbEnriched / dbPlayerCount) * 100)
+      : 0;
+
   const decisionMessage =
-    intelligence.inviteNow.length > 0
-      ? `${intelligence.inviteNow.length} players are showing invite-level signals.`
-      : "No invite-level signals yet. Keep enriching and reviewing.";
+    dbPlayerCount && dbPlayerCount >= 70000
+      ? `${dbPlayerCount.toLocaleString()} prospects are now in the global scouting database.`
+      : "ScoutBoard is building the global prospect intelligence layer.";
 
   const missionMessage =
     intelligence.hiddenGems.length > 0
       ? `${intelligence.hiddenGems.length} possible hidden gems are worth a second look.`
-      : "The board is waiting for more enriched profiles to reveal hidden gems.";
+      : "Search, enrich, and add scout intel to turn the database into a decision board.";
 
-  // Load database stats once when the dashboard opens.
   useEffect(() => {
     async function loadStats() {
       try {
@@ -151,7 +148,12 @@ function DashboardPage({ prospects = [] }) {
     loadStats();
   }, []);
 
-  // Runs a Mongo-backed prospect search.
+  const databaseMilestone = getDatabaseMilestone(dbPlayerCount);
+const pipelineHealth = getPipelineHealth(dbCoveragePercent);
+const globalProgress = dbPlayerCount
+  ? Math.min(Math.round((dbPlayerCount / 100000) * 100), 100)
+  : 0;
+
   async function handleSearch() {
     try {
       const results = await searchProspects(searchTerm, 100);
@@ -162,7 +164,6 @@ function DashboardPage({ prospects = [] }) {
     }
   }
 
-  // Enriches the selected player, reloads detail, then refreshes DB stats.
   async function handleEnrich() {
     if (!selectedPlayerId) return;
 
@@ -184,7 +185,6 @@ function DashboardPage({ prospects = [] }) {
     }
   }
 
-  // Loads full Mongo player detail when a prospect is selected.
   useEffect(() => {
     if (!selectedPlayerId) return;
 
@@ -218,42 +218,117 @@ function DashboardPage({ prospects = [] }) {
   return (
     <main className="app-shell">
       <section className="hero">
-        <p className="eyebrow">App Intelligence for Hockey Operations</p>
+        <p className="eyebrow">Global Hockey Intelligence</p>
 
         <h1>ScoutBoard Intelligence</h1>
 
         <p>
-          Turn raw Elite Prospects data into hockey decisions: invite targets,
-          watch-list players, hidden gems, and profiles that need more data.
+          Turn a global prospect database into today’s shortlist: invite
+          targets, watch-list players, hidden gems, and profiles that need
+          scout intelligence.
         </p>
       </section>
 
       <section className="stats-grid">
-        <StatCard label="Mongo Players" value={playerCountDisplay} />
+        <StatCard label="Global Prospects" value={playerCountDisplay} />
+        <StatCard label="Countries" value={statsError ? "Unavailable" : dbCountries} />
+        <StatCard label="DB Enriched" value={statsError ? "Unavailable" : dbEnriched} />
         <StatCard label="Loaded List" value={loadedPlayerCount} />
         <StatCard label="Search Results" value={searchResultCount} />
-        <StatCard label="Invite Now" value={intelligence.inviteNow.length} />
-
-        <StatCard
-          label="Top Score"
-          value={
-            intelligence.topProspect
-              ? getProspectScore(intelligence.topProspect)
-              : 0
-          }
-        />
-
-        <StatCard label="Scout XP" value={scoutXP} />
         <StatCard label="Scout Level" value={scoutLevel} compact />
       </section>
+      <section className="dashboard-card war-room-card">
+  <div className="war-room-content">
+    <div>
+      <p className="eyebrow">ScoutBoard War Room</p>
+
+      <h2>{databaseMilestone}</h2>
+
+      <p>
+        {playerCountDisplay} prospects across{" "}
+        {statsError ? "multiple" : dbCountries} countries. The board is now
+        built for finding today&apos;s best hockey decisions, not just storing
+        names.
+      </p>
+    </div>
+
+    <div className="war-room-meter">
+      <div
+        className="war-room-ring"
+        style={{ "--value": globalProgress }}
+      >
+        <span>{globalProgress}%</span>
+      </div>
+
+      <strong>100k Target</strong>
+      <small>{pipelineHealth}</small>
+    </div>
+  </div>
+</section>
 
       <section className="dashboard-card intelligence-card">
         <div className="section-header">
-          <h2>Decision Intelligence</h2>
+          <h2>Global Database Status</h2>
           <p>{decisionMessage}</p>
         </div>
 
         <div className="selected-stat-grid">
+          <StatCard label="Players" value={playerCountDisplay} compact />
+          <StatCard label="Countries" value={statsError ? "Unavailable" : dbCountries} compact />
+          <StatCard label="Enriched" value={statsError ? "Unavailable" : dbEnriched} compact />
+          <StatCard label="DB Coverage" value={`${dbCoveragePercent}%`} compact />
+          <StatCard label="Duplicates" value={statsError ? "Unavailable" : dbDuplicates} compact />
+        </div>
+      </section>
+
+      <section className="dashboard-card scout-mission-card">
+        <div className="section-header">
+          <h2>Prospect Pipeline</h2>
+          <p>
+            The goal is no longer volume. The goal is finding who deserves a
+            scout’s attention today.
+          </p>
+        </div>
+        <section className="dashboard-card rink-pipeline-card">
+  <div className="section-header">
+    <h2>Recruiting Rink</h2>
+
+    <p>
+      A hockey-first view of the player funnel from global pool to action-ready
+      targets.
+    </p>
+  </div>
+
+  <div className="rink-pipeline">
+    <div className="rink-zone">
+      <span>Total Pool</span>
+      <strong>{playerCountDisplay}</strong>
+      <small>Global database</small>
+    </div>
+
+    <div className="rink-zone">
+      <span>Enriched</span>
+      <strong>{statsError ? "Unavailable" : dbEnriched}</strong>
+      <small>Elite detail files</small>
+    </div>
+
+    <div className="rink-zone">
+      <span>Watch Closely</span>
+      <strong>{intelligence.watchClosely.length}</strong>
+      <small>Loaded review set</small>
+    </div>
+
+    <div className="rink-zone hot-zone">
+      <span>Invite Now</span>
+      <strong>{intelligence.inviteNow.length}</strong>
+      <small>Action signals</small>
+    </div>
+  </div>
+</section>
+
+        <div className="selected-stat-grid">
+          <StatCard label="Total Pool" value={playerCountDisplay} compact />
+          <StatCard label="Loaded Review Set" value={loadedPlayerCount} compact />
           <StatCard label="Invite Now" value={intelligence.inviteNow.length} compact />
           <StatCard label="Watch Closely" value={intelligence.watchClosely.length} compact />
           <StatCard label="Needs Data" value={intelligence.needsData.length} compact />
@@ -270,8 +345,17 @@ function DashboardPage({ prospects = [] }) {
         <div className="selected-stat-grid">
           <StatCard label="Scout XP" value={scoutXP} compact />
           <StatCard label="Scout Level" value={scoutLevel} compact />
-          <StatCard label="Intel Coverage" value={`${intelligence.coveragePercent}%`} compact />
+          <StatCard label="Loaded Intel Coverage" value={`${intelligence.coveragePercent}%`} compact />
           <StatCard label="Enriched Loaded" value={intelligence.enrichedCount} compact />
+          <StatCard
+            label="Top Loaded Score"
+            value={
+              intelligence.topProspect
+                ? getProspectScore(intelligence.topProspect)
+                : 0
+            }
+            compact
+          />
         </div>
       </section>
 
@@ -280,33 +364,9 @@ function DashboardPage({ prospects = [] }) {
           <h2>Scouting Intelligence Center</h2>
 
           <p>
-            {playerCountDisplay} Players • {loadedPlayerCount} Loaded •{" "}
-            {searchResultCount} Search Results
+            Search the database, select a prospect, enrich the profile, then add
+            optional scout intelligence where public data is missing.
           </p>
-        </div>
-
-        <div className="selected-stat-grid">
-          <StatCard label="Players" value={playerCountDisplay} compact />
-
-          <StatCard
-            label="Countries"
-            value={
-              statsError ? "Unavailable" : dbStats?.countries ?? "Loading..."
-            }
-            compact
-          />
-
-          <StatCard
-            label="DB Enriched"
-            value={statsError ? "Unavailable" : dbStats?.enriched ?? 0}
-            compact
-          />
-
-          <StatCard
-            label="Duplicates"
-            value={statsError ? "Unavailable" : dbStats?.duplicateCount ?? 0}
-            compact
-          />
         </div>
 
         <div className="search-row">
@@ -318,7 +378,7 @@ function DashboardPage({ prospects = [] }) {
           />
 
           <button className="button-link" type="button" onClick={handleSearch}>
-            Search
+            🔍 Find Prospect
           </button>
         </div>
 
@@ -353,52 +413,51 @@ function DashboardPage({ prospects = [] }) {
         </section>
       )}
 
-      {/* Selected player view.
-          ProspectCard is now the single source of truth for player detail,
-          so the old duplicate player-detail-card has been removed. */}
       {displayPlayer && (
-        <section className="prospect-grid single-prospect-grid">
-          <ProspectCard
-            player={displayPlayer}
-            getProspectScore={getProspectScore}
-          />
+  <section className="selected-player-stage">
+    <div className="hockey-card-toolbar">
+      <div>
+        <p className="eyebrow">Selected Prospect</p>
+        <h2>{displayPlayer.name || "Unknown Player"}</h2>
+        <p>
+          {displayPlayer.team || "Unknown Team"} •{" "}
+          {displayPlayer.position || "N/A"} •{" "}
+          {displayPlayer.nationality || "Nationality unavailable"}
+        </p>
+      </div>
 
-          <div className="dashboard-card">
-            <div className="section-header">
-              <h2>Player Actions</h2>
+      <div className="hockey-card-actions">
+        <button
+          className="button-link"
+          type="button"
+          onClick={handleEnrich}
+          disabled={enrichLoading}
+        >
+          {enrichLoading ? "Enriching..." : "Enrich Player"}
+        </button>
 
-              <p>
-                Enrich this player from Elite Prospects when you need deeper
-                profile data before making a scouting decision.
-              </p>
-            </div>
+        {displayPlayer.eliteUrl && (
+          <a
+            href={displayPlayer.eliteUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="button-link"
+          >
+            Elite Profile
+          </a>
+        )}
+      </div>
+    </div>
 
-            <button
-              className="button-link"
-              type="button"
-              onClick={handleEnrich}
-              disabled={enrichLoading}
-            >
-              {enrichLoading ? "Enriching..." : "Enrich Selected Player"}
-            </button>
+    <div className="hockey-card-frame">
+      <ProspectCard
+        player={displayPlayer}
+        getProspectScore={getProspectScore}
+      />
+    </div>
+  </section>
+)}
 
-            {displayPlayer.eliteUrl && (
-              <a
-                href={displayPlayer.eliteUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="button-link"
-              >
-                View Elite Prospects Profile
-              </a>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* Global prospect charts.
-          This keeps the second chart set only,
-          using the loaded/scored prospect list instead of a single selected player. */}
       <ProspectCharts
         prospects={intelligence.scoredProspects}
         getProspectScore={getProspectScore}

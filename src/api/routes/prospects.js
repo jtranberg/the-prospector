@@ -552,8 +552,11 @@ router.post("/enrich/:id", async (req, res) => {
       {
         $set: {
           ...prospect,
-          enrichedAt: new Date(),
+
+          // ScoutBoard enrichment metadata
           enriched: true,
+          enrichedAt: new Date(),
+          lastEliteSyncAt: new Date(),
         },
       },
       {
@@ -676,17 +679,17 @@ router.patch("/:eliteId/manual", async (req, res) => {
   try {
     const { eliteId } = req.params;
 
-   const {
-  manualHeight,
-  manualWeight,
-  manualShoots,
-  manualBirthYear,
-  manualDateOfBirth,
-  manualAge,
-  manualPlusMinus,
-  manualJerseyNumber,
-  manualNotes,
-} = req.body;
+    const {
+      manualHeight,
+      manualWeight,
+      manualShoots,
+      manualBirthYear,
+      manualDateOfBirth,
+      manualAge,
+      manualPlusMinus,
+      manualJerseyNumber,
+      manualNotes,
+    } = req.body;
 
     const updated = await Prospect.findOneAndUpdate(
       { eliteId: String(eliteId) },

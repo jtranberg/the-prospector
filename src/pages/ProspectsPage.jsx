@@ -1,11 +1,25 @@
+import { useEffect, useState } from "react";
+
 import ProspectTable from "../components/ProspectTable";
 import StatCard from "../components/StatCard";
 import { getProspectScore, getPPG } from "../lib/prospectScoring";
+import { loadProspectStats } from "../lib/liveProspects";
 
 function ProspectsPage({ prospects = [] }) {
-  const activeProspects = prospects.filter(
-    (player) => player.source === "elite_prospects",
-  );
+  const [dbStats, setDbStats] = useState(null);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const stats = await loadProspectStats();
+        setDbStats(stats);
+      } catch (error) {
+        console.error("Unable to load prospect stats:", error);
+      }
+    }
+
+    loadStats();
+  }, []);
 
   const topProspect = prospects.reduce((best, player) => {
     if (!best) return player;
@@ -19,7 +33,7 @@ function ProspectsPage({ prospects = [] }) {
 
   const topPPG = prospects.reduce((best, player) => {
     if (!best) return player;
-    return getPPG(player) > getPPG(best) ? player : best;
+    return Number(getPPG(player)) > Number(getPPG(best)) ? player : best;
   }, null);
 
   return (
@@ -36,17 +50,36 @@ function ProspectsPage({ prospects = [] }) {
       </section>
 
       <section className="stats-grid">
-        <StatCard label="Mongo Prospects" value={activeProspects.length} />
         <StatCard
-          label="Top Prospect"
-          value={topProspect ? getProspectScore(topProspect) : 0}
+          label="Mongo Prospects"
+          value={dbStats?.total ?? "Loading..."}
         />
         <StatCard
-          label="Top Points"
-          value={topScorer ? topScorer.points ?? 0 : 0}
-        />
+  label="Top Points"
+  value={topScorer ? topScorer.points ?? 0 : 0}
+/>
+
         <StatCard
-          label="Best PPG"
+          label="Countries"
+          value={dbStats?.countries ?? "Loading..."}
+        />
+
+        <StatCard
+          label="DB Enriched"
+          value={dbStats?.enriched ?? "Loading..."}
+        />
+
+        <StatCard label="Loaded Page" value={prospects.length} />
+
+        <StatCard
+          label="Top Loaded Score"
+          value={
+            topProspect ? getProspectScore(topProspect) : 0
+          }
+        />
+
+        <StatCard
+          label="Best Loaded PPG"
           value={topPPG ? getPPG(topPPG) : "0.00"}
         />
       </section>
@@ -56,8 +89,8 @@ function ProspectsPage({ prospects = [] }) {
           <h2>All Synced Prospects</h2>
 
           <p>
-            Local Mongo records • Elite Prospects source • Detail enrichment
-            available for selected players.
+            Showing loaded Mongo page • Total database:{" "}
+            {dbStats?.total ?? "Loading..."} prospects.
           </p>
         </div>
 

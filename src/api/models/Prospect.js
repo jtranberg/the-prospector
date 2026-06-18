@@ -100,7 +100,12 @@ const prospectSchema = new mongoose.Schema(
 
     imageUrl: String,
     eliteUrl: String,
-    eliteUpdatedAt: String,
+    eliteUpdatedAt: Date,
+
+    lastEliteSyncAt: {
+      type: Date,
+      default: null,
+    },
 
     // Store the full Elite Prospects response
     rawElite: mongoose.Schema.Types.Mixed,

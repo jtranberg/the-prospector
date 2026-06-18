@@ -10,7 +10,7 @@ body {
       rgba(42, 114, 255, 0.22),
       transparent 32%
     ),
-    linear-gradient(135deg, #07111f, #0c1726 45%, #111827);
+    linear-gradient(135deg, #0c2851, #14253cd8 55%, #050e20);
   color: #f8fafc;
   font-family: Arial, sans-serif;
 }
@@ -29,7 +29,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 28px;
 
-  background: rgba(58, 109, 211, 0.812);
+  background: rgba(38, 117, 237, 0.812);
 
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
 
@@ -80,7 +80,7 @@ body {
   min-width: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(49, 143, 238, 0.38);
   box-shadow: 0 20px 70px rgba(0, 0, 0, 0.28);
 }
 
@@ -124,8 +124,8 @@ body {
   padding: 20px;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.09),
-    rgba(255, 255, 255, 0.04)
+    rgba(50, 112, 236, 0.26),
+    rgba(1, 8, 21, 0.318)
   );
   backdrop-filter: blur(10px);
 }
@@ -312,12 +312,14 @@ td small {
   border-radius: 999px;
   font-size: 0.78rem;
   white-space: nowrap;
+  
 }
 
 .status-pill {
   border: 1px solid rgba(147, 197, 253, 0.4);
   background: rgba(37, 99, 235, 0.18);
   color: #bfdbfe;
+  
 }
 
 .upside-pill {
@@ -905,4 +907,426 @@ td small {
 .manual-data {
   color: #7dd3fc;
   font-weight: 700;
+}
+
+.hockey-gauge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin: 22px 0;
+}
+
+.hockey-gauge-card {
+  padding: 16px;
+  border-radius: 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(147, 197, 253, 0.16);
+}
+
+.radial-gauge {
+  --value: 0;
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle, #0f172a 56%, transparent 57%),
+    conic-gradient(
+      rgba(96, 165, 250, 0.95) calc(var(--value) * 1%),
+      rgba(255, 255, 255, 0.1) 0
+    );
+  box-shadow: 0 0 24px rgba(96, 165, 250, 0.18);
+}
+
+.radial-gauge span {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #e0f2fe;
+}
+
+.hockey-gauge-card strong {
+  display: block;
+  color: #f8fafc;
+  font-size: 0.92rem;
+}
+
+.hockey-gauge-card small {
+  display: block;
+  margin-top: 5px;
+  color: #94a3b8;
+  font-size: 0.76rem;
+}
+
+/* ==============================
+   ScoutBoard War Room
+   ============================== */
+
+.war-room-card {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.war-room-card::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.22), transparent 36%),
+    radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.14), transparent 34%);
+  pointer-events: none;
+}
+
+.war-room-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+}
+
+.war-room-content h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  color: #a9d6eb;
+}
+
+.war-room-content p {
+  max-width: 720px;
+  color: #94a3b8;
+}
+
+.war-room-meter {
+  min-width: 150px;
+  text-align: center;
+}
+
+.war-room-ring {
+  --value: 0;
+  width: 118px;
+  height: 118px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle, #0f172a 57%, transparent 58%),
+    conic-gradient(
+      rgba(96, 165, 250, 0.95) calc(var(--value) * 1%),
+      rgba(255, 255, 255, 0.09) 0
+    );
+  box-shadow: 0 0 34px rgba(96, 165, 250, 0.2);
+}
+
+.war-room-ring span {
+  color: #e0f2fe;
+  font-weight: 900;
+  font-size: 1.35rem;
+}
+
+.war-room-meter strong {
+  display: block;
+  color: #f8fafc;
+}
+
+.war-room-meter small {
+  color: #94a3b8;
+}
+
+/* ==============================
+   Recruiting Rink Pipeline
+   ============================== */
+
+.rink-pipeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.rink-zone {
+  position: relative;
+  padding: 18px;
+  border-radius: 22px;
+  text-align: center;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.035));
+  border: 1px solid rgba(147, 197, 253, 0.16);
+}
+
+.rink-zone::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 50%;
+  height: 1px;
+  background: rgba(147, 197, 253, 0.18);
+}
+
+.rink-zone span,
+.rink-zone strong,
+.rink-zone small {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+
+.rink-zone span {
+  color: #93c5fd;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.rink-zone strong {
+  margin: 8px 0;
+  color: #f8fafc;
+  font-size: 1.7rem;
+}
+
+.rink-zone small {
+  color: #94a3b8;
+}
+
+.hot-zone {
+  border-color: rgba(250, 204, 21, 0.38);
+  box-shadow: 0 0 28px rgba(250, 204, 21, 0.12);
+}
+
+  .scout-mission-card
+{
+  margin-top: 15px;
+}
+.player-selector-card
+{
+  margin-top: 15px;
+}
+/* ==============================
+   Selected Hockey Card Stage
+   ============================== */
+
+.selected-player-stage {
+  margin: 24px 0;
+  padding: 18px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+  border: 1px solid rgba(147, 197, 253, 0.18);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.24);
+}
+
+.hockey-card-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(15, 23, 42, 0.58);
+  border: 1px solid rgba(147, 197, 253, 0.12);
+}
+
+.hockey-card-toolbar h2 {
+  margin: 0;
+  color: #f8fafc;
+}
+
+.hockey-card-toolbar p {
+  margin: 6px 0 0;
+  color: #94a3b8;
+}
+
+.hockey-card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.hockey-card-frame {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Makes the player card feel like the hero asset */
+.hockey-card-frame .prospect-card {
+  border-radius: 28px;
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  box-shadow:
+    0 0 34px rgba(96, 165, 250, 0.12),
+    0 30px 90px rgba(0, 0, 0, 0.35);
+}
+
+/* Mobile cleanup */
+@media (max-width: 760px) {
+  .hockey-card-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hockey-card-actions {
+    justify-content: flex-start;
+  }
+
+  .hockey-card-frame {
+    max-width: 100%;
+  }
+}
+
+.hockey-chart-card {
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.12), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025));
+}
+
+.hockey-chart-card .section-header {
+  margin-bottom: 12px;
+}
+
+.hockey-chart-card h3 {
+  margin: 0;
+  color: #f8fafc;
+}
+
+.hockey-chart-card p {
+  margin: 6px 0 0;
+  color: #94a3b8;
+  font-size: 0.86rem;
+}
+.top-nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.nav-pill {
+  padding: 10px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  color: #cbd5e1;
+
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(147,197,253,0.15);
+
+  transition: all 0.2s ease;
+}
+
+.nav-pill:hover {
+  background: rgba(96,165,250,0.15);
+  border-color: rgba(96,165,250,0.35);
+}
+
+.nav-pill.active {
+  background: rgba(96,165,250,0.22);
+  color: white;
+  box-shadow: 0 0 20px rgba(96,165,250,0.18);
+}
+
+.top-nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.nav-pill {
+  padding: 10px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  color: #cbd5e1;
+
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(147,197,253,0.15);
+
+  transition: all 0.2s ease;
+}
+
+.nav-pill:hover {
+  background: rgba(96,165,250,0.15);
+  border-color: rgba(96,165,250,0.35);
+}
+
+.nav-pill.active {
+  background: rgba(96,165,250,0.22);
+  color: white;
+  box-shadow: 0 0 20px rgba(96,165,250,0.18);
+}
+
+.leaderboard-list,
+.country-pipeline-list {
+  display: grid;
+  gap: 12px;
+}
+
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(147, 197, 253, 0.12);
+}
+
+.leaderboard-rank {
+  color: #93c5fd;
+  font-weight: 900;
+}
+
+.leaderboard-row strong {
+  display: block;
+  color: #f8fafc;
+}
+
+.leaderboard-row small {
+  color: #94a3b8;
+}
+
+.leaderboard-score {
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: #e0f2fe;
+  font-weight: 900;
+  background: rgba(96, 165, 250, 0.18);
+  border: 1px solid rgba(96, 165, 250, 0.28);
+}
+
+.country-pipeline-row {
+  display: grid;
+  gap: 8px;
+}
+
+.country-pipeline-label {
+  display: flex;
+  justify-content: space-between;
+  color: #f8fafc;
+}
+
+.country-pipeline-label span {
+  color: #93c5fd;
+  font-weight: 800;
+}
+
+.country-pipeline-track {
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.country-pipeline-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #38bdf8, #60a5fa);
 }

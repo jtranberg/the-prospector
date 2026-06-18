@@ -144,6 +144,21 @@ function getScoreClass(score) {
   return "score-low";
 }
 
+function clampGauge(value) {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function getProductionGauge(ppg) {
+  return clampGauge((ppg / 2) * 100);
+}
+
+function getXPLevel(cardXP) {
+  if (cardXP >= 90) return "Franchise Watch";
+  if (cardXP >= 70) return "Top Target";
+  if (cardXP >= 50) return "Scout Follow";
+  return "Developing File";
+}
+
 function ProspectCard({ player, getProspectScore }) {
   const [manualFormOpen, setManualFormOpen] = useState(false);
   const [manualSaving, setManualSaving] = useState(false);
@@ -168,6 +183,11 @@ function ProspectCard({ player, getProspectScore }) {
   const intelBadge = getIntelBadge(activePlayer, score, ppg);
   const cardXP = getCardXP(activePlayer, score, ppg);
   const dataQuality = getDataQuality(activePlayer);
+
+  const scoreGauge = clampGauge(score);
+  const productionGauge = getProductionGauge(ppg);
+  const qualityGauge = clampGauge(dataQuality);
+  const xpLevel = getXPLevel(cardXP);
 
   async function handleManualSave() {
     if (!eliteId) return;
@@ -549,6 +569,55 @@ function ProspectCard({ player, getProspectScore }) {
           {activePlayer.upside || "Medium"} Upside
         </span>
       </div>
+      <div className="hockey-gauge-grid">
+  <div className="hockey-gauge-card">
+    <div
+      className="radial-gauge"
+      style={{ "--value": scoreGauge }}
+    >
+      <span>{scoreGauge}</span>
+    </div>
+
+    <strong>Draft Signal</strong>
+    <small>{decision}</small>
+  </div>
+
+  <div className="hockey-gauge-card">
+    <div
+      className="radial-gauge"
+      style={{ "--value": productionGauge }}
+    >
+      <span>{productionGauge}%</span>
+    </div>
+
+    <strong>Production</strong>
+    <small>{getPPG(activePlayer)} PPG</small>
+  </div>
+
+  <div className="hockey-gauge-card">
+    <div
+      className="radial-gauge"
+      style={{ "--value": qualityGauge }}
+    >
+      <span>{qualityGauge}%</span>
+    </div>
+
+    <strong>Intel Quality</strong>
+    <small>{activePlayer.enriched ? "Verified file" : "Needs enrich"}</small>
+  </div>
+
+  <div className="hockey-gauge-card">
+    <div
+      className="radial-gauge"
+      style={{ "--value": clampGauge(cardXP) }}
+    >
+      <span>{cardXP}</span>
+    </div>
+
+    <strong>Scout XP</strong>
+    <small>{xpLevel}</small>
+  </div>
+</div>
     </div>
   );
 }
