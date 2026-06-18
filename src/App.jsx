@@ -13,6 +13,7 @@ const csvProspects = loadCsvProspects();
 
 function App() {
   const [prospects, setProspects] = useState(csvProspects);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     async function loadMongoProspects() {
@@ -37,13 +38,46 @@ function App() {
   return (
     <>
       <nav className="top-nav">
-        <Link to="/" className="nav-pill">
-          Dashboard
-        </Link>
+        <div className="mobile-nav-header">
+          <strong>The Prospector</strong>
 
-        <Link to="/prospects" className="nav-pill">
-          Prospect Database
-        </Link>
+          <button
+            className="hamburger-button"
+            type="button"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            aria-label="Toggle navigation menu"
+          >
+            ☰
+          </button>
+        </div>
+
+        <div className={`nav-links ${mobileMenuOpen ? "open" : ""}`}>
+          <Link
+            to="/"
+            className="nav-pill"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Dashboard
+          </Link>
+
+          <Link
+            to="/prospects"
+            className="nav-pill"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Prospect Database
+          </Link>
+
+          <a
+            href="https://appintelligence.ca"
+            target="_blank"
+            rel="noreferrer"
+            className="ai-badge nav-ai-badge"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Powered by App Intelligence
+          </a>
+        </div>
       </nav>
 
       <Routes>

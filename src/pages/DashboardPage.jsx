@@ -258,14 +258,7 @@ function DashboardPage({ prospects = [] }) {
 
   return (
     <main className="app-shell">
-      <a
-        href="https://appintelligence.ca"
-        target="_blank"
-        rel="noreferrer"
-        className="ai-badge"
-      >
-        Powered by App Intelligence
-      </a>
+      
       <section className="hero">
         <p className="eyebrow">Global Hockey Intelligence</p>
 
