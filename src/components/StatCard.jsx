@@ -1,8 +1,13 @@
-function StatCard({ label, value, compact = false }) {
+function StatCard({
+  label,
+  value,
+  compact = false,
+  valueStyle = {},
+}) {
   return (
     <div className={`stat-card ${compact ? "compact-stat" : ""}`}>
       <span>{label}</span>
-      <strong>{value}</strong>
+      <strong style={valueStyle}>{value}</strong>
     </div>
   );
 }

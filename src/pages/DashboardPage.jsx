@@ -37,16 +37,25 @@ function DashboardPage({ prospects = [] }) {
   const [statsError, setStatsError] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeSearchTerm, setActiveSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [searchPage, setSearchPage] = useState(1);
+  const [searchTotal, setSearchTotal] = useState(0);
+
+  const [hasSearched, setHasSearched] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
 
   const [enrichLoading, setEnrichLoading] = useState(false);
 
-  const selectableProspects = searchResults.length ? searchResults : prospects;
+  const selectableProspects = hasSearched ? searchResults : prospects;
+
+  const totalSearchPages = searchTotal ? Math.ceil(searchTotal / 100) : 1;
 
   const dbPlayerCount = dbStats?.total ?? null;
   const playerCountDisplay = statsError
     ? "Unavailable"
-    : dbPlayerCount ?? "Loading...";
+    : (dbPlayerCount ?? "Loading...");
 
   const loadedPlayerCount = prospects.length;
   const searchResultCount = searchResults.length;
@@ -94,8 +103,9 @@ function DashboardPage({ prospects = [] }) {
       return player.scoutScore > best.scoutScore ? player : best;
     }, null);
 
-    const enrichedCount = scoredProspects.filter((player) => player.enriched)
-      .length;
+    const enrichedCount = scoredProspects.filter(
+      (player) => player.enriched,
+    ).length;
 
     const coveragePercent = loadedPlayerCount
       ? Math.round((enrichedCount / loadedPlayerCount) * 100)
@@ -149,18 +159,44 @@ function DashboardPage({ prospects = [] }) {
   }, []);
 
   const databaseMilestone = getDatabaseMilestone(dbPlayerCount);
-const pipelineHealth = getPipelineHealth(dbCoveragePercent);
-const globalProgress = dbPlayerCount
-  ? Math.min(Math.round((dbPlayerCount / 100000) * 100), 100)
-  : 0;
+  const pipelineHealth = getPipelineHealth(dbCoveragePercent);
+  const globalProgress = dbPlayerCount
+    ? Math.min(Math.round((dbPlayerCount / 100000) * 100), 100)
+    : 0;
 
-  async function handleSearch() {
+  async function handleSearch(page = 1) {
+    const cleanSearch = searchTerm.trim();
+
+    if (!cleanSearch) {
+      setHasSearched(false);
+      setSearchResults([]);
+      setSearchTotal(0);
+      setSearchPage(1);
+      setActiveSearchTerm("");
+      setSelectedPlayerId("");
+      setSelectedPlayerDetail(null);
+      return;
+    }
+
     try {
-      const results = await searchProspects(searchTerm, 100);
-      setSearchResults(results);
+      setSearchLoading(true);
+      setSearchError("");
+      setHasSearched(true);
+      setSelectedPlayerId("");
+      setSelectedPlayerDetail(null);
+
+      const data = await searchProspects(cleanSearch, 100, page);
+
+      setSearchResults(data.players);
+      setSearchTotal(data.total);
+      setSearchPage(data.page);
+      setActiveSearchTerm(cleanSearch);
     } catch (error) {
       console.error("Unable to search prospects:", error);
       setSearchResults([]);
+      setSearchError("Search unavailable. Check API connection.");
+    } finally {
+      setSearchLoading(false);
     }
   }
 
@@ -217,54 +253,69 @@ const globalProgress = dbPlayerCount
 
   return (
     <main className="app-shell">
+      <a
+  href="https://appintelligence.ca"
+  target="_blank"
+  rel="noreferrer"
+  className="ai-badge"
+>
+  Powered by App Intelligence
+</a>
       <section className="hero">
         <p className="eyebrow">Global Hockey Intelligence</p>
 
-        <h1>ScoutBoard Intelligence</h1>
+        <h1>The Prospector</h1>
 
         <p>
           Turn a global prospect database into today’s shortlist: invite
-          targets, watch-list players, hidden gems, and profiles that need
-          scout intelligence.
+          targets, watch-list players, hidden gems, and profiles that need scout
+          intelligence.
         </p>
       </section>
 
       <section className="stats-grid">
         <StatCard label="Global Prospects" value={playerCountDisplay} />
-        <StatCard label="Countries" value={statsError ? "Unavailable" : dbCountries} />
-        <StatCard label="DB Enriched" value={statsError ? "Unavailable" : dbEnriched} />
+        <StatCard
+          label="Countries"
+          value={statsError ? "Unavailable" : dbCountries}
+        />
+        <StatCard
+          label="DB Enriched"
+          value={statsError ? "Unavailable" : dbEnriched}
+        />
         <StatCard label="Loaded List" value={loadedPlayerCount} />
         <StatCard label="Search Results" value={searchResultCount} />
         <StatCard label="Scout Level" value={scoutLevel} compact />
       </section>
+
       <section className="dashboard-card war-room-card">
-  <div className="war-room-content">
-    <div>
-      <p className="eyebrow">ScoutBoard War Room</p>
+        <div className="war-room-content">
+          <div>
+            <p className="eyebrow">ScoutBoard War Room</p>
 
-      <h2>{databaseMilestone}</h2>
+            <h2>{databaseMilestone}</h2>
 
-      <p>
-        {playerCountDisplay} prospects across{" "}
-        {statsError ? "multiple" : dbCountries} countries. The board is now
-        built for finding today&apos;s best hockey decisions, not just storing
-        names.
-      </p>
-    </div>
+            <p>
+              {playerCountDisplay} prospects across{" "}
+              {statsError ? "multiple" : dbCountries} countries. The board is
+              now built for finding today&apos;s best hockey decisions, not just
+              storing names.
+            </p>
+          </div>
 
-    <div className="war-room-meter">
-      <div
-        className="war-room-ring"
-        style={{ "--value": globalProgress }}
-      >
-        <span>{globalProgress}%</span>
-      </div>
+          <div className="war-room-meter">
+            <div
+              className="war-room-ring"
+              style={{ "--value": globalProgress }}
+            >
+              <span>{globalProgress}%</span>
+            </div>
 
-      <strong>100k Target</strong>
-      <small>{pipelineHealth}</small>
-    </div>
-  </div>
-</section>
+            <strong>100k Target</strong>
+            <small>{pipelineHealth}</small>
+          </div>
+        </div>
+      </section>
 
       <section className="dashboard-card intelligence-card">
         <div className="section-header">
@@ -274,10 +325,26 @@ const globalProgress = dbPlayerCount
 
         <div className="selected-stat-grid">
           <StatCard label="Players" value={playerCountDisplay} compact />
-          <StatCard label="Countries" value={statsError ? "Unavailable" : dbCountries} compact />
-          <StatCard label="Enriched" value={statsError ? "Unavailable" : dbEnriched} compact />
-          <StatCard label="DB Coverage" value={`${dbCoveragePercent}%`} compact />
-          <StatCard label="Duplicates" value={statsError ? "Unavailable" : dbDuplicates} compact />
+          <StatCard
+            label="Countries"
+            value={statsError ? "Unavailable" : dbCountries}
+            compact
+          />
+          <StatCard
+            label="Enriched"
+            value={statsError ? "Unavailable" : dbEnriched}
+            compact
+          />
+          <StatCard
+            label="DB Coverage"
+            value={`${dbCoveragePercent}%`}
+            compact
+          />
+          <StatCard
+            label="Duplicates"
+            value={statsError ? "Unavailable" : dbDuplicates}
+            compact
+          />
         </div>
       </section>
 
@@ -289,50 +356,91 @@ const globalProgress = dbPlayerCount
             scout’s attention today.
           </p>
         </div>
+
         <section className="dashboard-card rink-pipeline-card">
-  <div className="section-header">
-    <h2>Recruiting Rink</h2>
+          <div className="section-header">
+            <h2>Recruiting Rink</h2>
 
-    <p>
-      A hockey-first view of the player funnel from global pool to action-ready
-      targets.
-    </p>
-  </div>
+            <p>
+              A hockey-first view of the player funnel from global pool to
+              action-ready targets.
+            </p>
+          </div>
 
-  <div className="rink-pipeline">
-    <div className="rink-zone">
-      <span>Total Pool</span>
-      <strong>{playerCountDisplay}</strong>
-      <small>Global database</small>
-    </div>
+          <div className="rink-pipeline">
+            <div className="rink-zone">
+              <span>Total Pool</span>
+              <strong>{playerCountDisplay}</strong>
+              <small>Global database</small>
+            </div>
 
-    <div className="rink-zone">
-      <span>Enriched</span>
-      <strong>{statsError ? "Unavailable" : dbEnriched}</strong>
-      <small>Elite detail files</small>
-    </div>
+            <div className="rink-zone">
+              <span>Enriched</span>
+              <strong>{statsError ? "Unavailable" : dbEnriched}</strong>
+              <small>Elite detail files</small>
+            </div>
 
-    <div className="rink-zone">
-      <span>Watch Closely</span>
-      <strong>{intelligence.watchClosely.length}</strong>
-      <small>Loaded review set</small>
-    </div>
+            <div className="rink-zone">
+              <span>Watch Closely</span>
+              <strong>{intelligence.watchClosely.length}</strong>
+              <small>Loaded review set</small>
+            </div>
 
-    <div className="rink-zone hot-zone">
-      <span>Invite Now</span>
-      <strong>{intelligence.inviteNow.length}</strong>
-      <small>Action signals</small>
-    </div>
-  </div>
-</section>
+            <div className="rink-zone hot-zone">
+              <span>Invite Now</span>
+              <strong>{intelligence.inviteNow.length}</strong>
+              <small>Action signals</small>
+            </div>
+          </div>
+        </section>
 
         <div className="selected-stat-grid">
           <StatCard label="Total Pool" value={playerCountDisplay} compact />
-          <StatCard label="Loaded Review Set" value={loadedPlayerCount} compact />
-          <StatCard label="Invite Now" value={intelligence.inviteNow.length} compact />
-          <StatCard label="Watch Closely" value={intelligence.watchClosely.length} compact />
-          <StatCard label="Needs Data" value={intelligence.needsData.length} compact />
-          <StatCard label="Hidden Gems" value={intelligence.hiddenGems.length} compact />
+          <StatCard
+            label="Loaded Review Set"
+            value={loadedPlayerCount}
+            compact
+          />
+          <StatCard
+            label="Global "
+            value={`${dbCountries} Countries`}
+            compact
+            valueStyle={{
+              fontSize: "1rem",
+              lineHeight: "1.2",
+            }}
+          />
+
+          <StatCard
+            label="Database Tier"
+            value={databaseMilestone}
+            compact
+            valueStyle={{
+              fontSize: "0.95rem",
+              lineHeight: "1.2",
+            }}
+          />
+
+          <StatCard
+            label="Invite Now"
+            value={intelligence.inviteNow.length}
+            compact
+          />
+          <StatCard
+            label="Watch Closely"
+            value={intelligence.watchClosely.length}
+            compact
+          />
+          <StatCard
+            label="Needs Data"
+            value={intelligence.needsData.length}
+            compact
+          />
+          <StatCard
+            label="Hidden Gems"
+            value={intelligence.hiddenGems.length}
+            compact
+          />
         </div>
       </section>
 
@@ -345,8 +453,16 @@ const globalProgress = dbPlayerCount
         <div className="selected-stat-grid">
           <StatCard label="Scout XP" value={scoutXP} compact />
           <StatCard label="Scout Level" value={scoutLevel} compact />
-          <StatCard label="Loaded Intel Coverage" value={`${intelligence.coveragePercent}%`} compact />
-          <StatCard label="Enriched Loaded" value={intelligence.enrichedCount} compact />
+          <StatCard
+            label="Loaded Intel Coverage"
+            value={`${intelligence.coveragePercent}%`}
+            compact
+          />
+          <StatCard
+            label="Enriched Loaded"
+            value={intelligence.enrichedCount}
+            compact
+          />
           <StatCard
             label="Top Loaded Score"
             value={
@@ -375,12 +491,58 @@ const globalProgress = dbPlayerCount
             placeholder="Search by name, country, team, or position..."
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                handleSearch(1);
+              }
+            }}
           />
 
-          <button className="button-link" type="button" onClick={handleSearch}>
+          <button
+            className="button-link"
+            type="button"
+            onClick={() => handleSearch(1)}
+          >
             🔍 Find Prospect
           </button>
         </div>
+
+        {searchLoading && <p className="muted">Searching database...</p>}
+
+        {searchError && <p className="error-text">{searchError}</p>}
+
+        {hasSearched && !searchLoading && (
+          <p className="muted">
+            Showing {searchResults.length} of {searchTotal.toLocaleString()}{" "}
+            result{searchTotal === 1 ? "" : "s"} for "{activeSearchTerm}".
+          </p>
+        )}
+
+        {hasSearched && !searchLoading && searchTotal > 100 && (
+          <div className="pagination-row">
+            <button
+              className="button-link"
+              type="button"
+              disabled={searchPage <= 1}
+              onClick={() => handleSearch(searchPage - 1)}
+            >
+              ◀ Previous 100
+            </button>
+
+            <span className="muted">
+              Page {searchPage} of {totalSearchPages}
+            </span>
+
+            <button
+              className="button-link"
+              type="button"
+              disabled={searchPage >= totalSearchPages}
+              onClick={() => handleSearch(searchPage + 1)}
+            >
+              Next 100 ▶
+            </button>
+          </div>
+        )}
 
         <select
           className="scout-input"
@@ -414,55 +576,81 @@ const globalProgress = dbPlayerCount
       )}
 
       {displayPlayer && (
-  <section className="selected-player-stage">
-    <div className="hockey-card-toolbar">
-      <div>
-        <p className="eyebrow">Selected Prospect</p>
-        <h2>{displayPlayer.name || "Unknown Player"}</h2>
-        <p>
-          {displayPlayer.team || "Unknown Team"} •{" "}
-          {displayPlayer.position || "N/A"} •{" "}
-          {displayPlayer.nationality || "Nationality unavailable"}
-        </p>
-      </div>
+        <section className="selected-player-stage">
+          <div className="hockey-card-toolbar">
+            <div>
+              <p className="eyebrow">Selected Prospect</p>
+              <h2>{displayPlayer.name || "Unknown Player"}</h2>
+              <p>
+                {displayPlayer.team || "Unknown Team"} •{" "}
+                {displayPlayer.position || "N/A"} •{" "}
+                {displayPlayer.nationality || "Nationality unavailable"}
+              </p>
+            </div>
 
-      <div className="hockey-card-actions">
-        <button
-          className="button-link"
-          type="button"
-          onClick={handleEnrich}
-          disabled={enrichLoading}
-        >
-          {enrichLoading ? "Enriching..." : "Enrich Player"}
-        </button>
+            <div className="hockey-card-actions">
+              <button
+                className="button-link"
+                type="button"
+                onClick={handleEnrich}
+                disabled={enrichLoading}
+              >
+                {enrichLoading ? "Enriching..." : "Enrich Player"}
+              </button>
 
-        {displayPlayer.eliteUrl && (
-          <a
-            href={displayPlayer.eliteUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="button-link"
-          >
-            Elite Profile
-          </a>
-        )}
-      </div>
-    </div>
+              {displayPlayer.eliteUrl && (
+                <a
+                  href={displayPlayer.eliteUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="button-link"
+                >
+                  Elite Profile
+                </a>
+              )}
+            </div>
+          </div>
 
-    <div className="hockey-card-frame">
-      <ProspectCard
-        player={displayPlayer}
-        getProspectScore={getProspectScore}
-      />
-    </div>
-  </section>
-)}
+          <div className="hockey-card-frame">
+            <ProspectCard
+              player={displayPlayer}
+              getProspectScore={getProspectScore}
+            />
+          </div>
+        </section>
+      )}
 
       <ProspectCharts
         prospects={intelligence.scoredProspects}
         getProspectScore={getProspectScore}
       />
+      <footer className="dashboard-footer">
+  <div>
+    <strong>The Prospector  </strong>
+    <span>
+      Global Hockey Intelligence Platform
+    </span>
+  </div>
+
+  <div>
+    <span>
+      {dbPlayerCount?.toLocaleString() || "0"} Prospects •{" "}
+      {dbCountries || 0} Countries
+    </span>
+  </div>
+
+  <div>
+    <a
+      href="https://appintelligence.ca"
+      target="_blank"
+      rel="noreferrer"
+    >
+      Built by App Intelligence
+    </a>
+  </div>
+</footer>
     </main>
+    
   );
 }
 

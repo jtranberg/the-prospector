@@ -33,15 +33,23 @@ export async function loadProspectById(id) {
   return data;
 }
 
-export async function searchProspects(query, limit = 100) {
+export async function searchProspects(query, limit = 100, page = 1) {
   const response = await fetch(
-    `${API_BASE}/api/prospects?q=${encodeURIComponent(query)}&limit=${limit}`
+    `${API_BASE}/api/prospects?q=${encodeURIComponent(
+      query,
+    )}&limit=${limit}&page=${page}`,
   );
 
   if (!response.ok) throw new Error("Prospect search unavailable");
 
   const data = await response.json();
-  return data.players || [];
+
+  return {
+    players: data.players || [],
+    total: data.total || 0,
+    page: data.page || page,
+    limit: data.limit || limit,
+  };
 }
 
 export async function enrichProspectById(id) {

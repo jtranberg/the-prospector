@@ -1330,3 +1330,58 @@ td small {
   border-radius: 999px;
   background: linear-gradient(90deg, #38bdf8, #60a5fa);
 }
+
+.country-flag {
+  width: 20px;
+  height: 14px;
+  object-fit: cover;
+  border-radius: 2px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.nationality-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(0, 195, 255, 0.15),
+    rgba(93, 95, 255, 0.15)
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+
+  transition: all 0.2s ease;
+}
+
+.ai-badge:hover {
+  transform: translateY(-2px);
+
+  border-color: rgba(0, 195, 255, 0.4);
+
+  box-shadow: 0 0 20px rgba(0, 195, 255, 0.25);
+}
+

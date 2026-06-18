@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { getPPG } from "../lib/prospectScoring";
 import { API_BASE_URL } from "../lib/apiConfig";
+import { getCountryCode } from "../lib/countryFlags";
 
 // Keeps display values clean and prevents blank/null fields from showing.
 function formatValue(value, fallback = "N/A") {
@@ -136,6 +137,7 @@ function buildManualForm(player) {
   };
 }
 
+// Applies score-based styling classes.
 function getScoreClass(score) {
   if (score >= 90) return "score-elite";
   if (score >= 80) return "score-great";
@@ -144,14 +146,18 @@ function getScoreClass(score) {
   return "score-low";
 }
 
+// Keeps gauge values between 0 and 100.
 function clampGauge(value) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
+// Converts PPG into a gauge percentage.
+// 2.00 PPG or higher becomes 100%.
 function getProductionGauge(ppg) {
   return clampGauge((ppg / 2) * 100);
 }
 
+// Turns scout XP into a display label.
 function getXPLevel(cardXP) {
   if (cardXP >= 90) return "Franchise Watch";
   if (cardXP >= 70) return "Top Target";
@@ -165,6 +171,7 @@ function ProspectCard({ player, getProspectScore }) {
   const [savedManual, setSavedManual] = useState(null);
   const [manualForm, setManualForm] = useState(() => buildManualForm(player));
 
+  // Do not render the card if no player was provided.
   if (!player) return null;
 
   // Use the latest parent player data, then overlay the latest saved manual data.
@@ -173,6 +180,14 @@ function ProspectCard({ player, getProspectScore }) {
     ...player,
     ...(savedManual || {}),
   };
+
+  // Converts nationality name into a country code, then builds the FlagCDN image URL.
+  // Example: Canada -> CA -> https://flagcdn.com/w40/ca.png
+  const countryCode = getCountryCode(activePlayer.nationality);
+
+  const flagUrl = countryCode
+    ? `https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`
+    : null;
 
   const eliteId = activePlayer.eliteId || activePlayer.id;
 
@@ -212,6 +227,7 @@ function ProspectCard({ player, getProspectScore }) {
 
       const data = await response.json();
 
+      // Save returned prospect data locally so the UI updates immediately.
       setSavedManual(data.prospect);
       setManualForm(buildManualForm(data.prospect));
       setManualFormOpen(false);
@@ -237,7 +253,15 @@ function ProspectCard({ player, getProspectScore }) {
             {activePlayer.position || "N/A"}
           </p>
 
-          <p className="prospect-team">
+          <p className="prospect-team nationality-row">
+            {flagUrl && (
+              <img
+                src={flagUrl}
+                alt={`${activePlayer.nationality} flag`}
+                className="country-flag"
+              />
+            )}
+
             {formatValue(activePlayer.nationality, "Nationality unavailable")} •
             Age {formatAge(activePlayer)}
           </p>
@@ -569,55 +593,49 @@ function ProspectCard({ player, getProspectScore }) {
           {activePlayer.upside || "Medium"} Upside
         </span>
       </div>
+
       <div className="hockey-gauge-grid">
-  <div className="hockey-gauge-card">
-    <div
-      className="radial-gauge"
-      style={{ "--value": scoreGauge }}
-    >
-      <span>{scoreGauge}</span>
-    </div>
+        <div className="hockey-gauge-card">
+          <div className="radial-gauge" style={{ "--value": scoreGauge }}>
+            <span>{scoreGauge}</span>
+          </div>
 
-    <strong>Draft Signal</strong>
-    <small>{decision}</small>
-  </div>
+          <strong>Draft Signal</strong>
+          <small>{decision}</small>
+        </div>
 
-  <div className="hockey-gauge-card">
-    <div
-      className="radial-gauge"
-      style={{ "--value": productionGauge }}
-    >
-      <span>{productionGauge}%</span>
-    </div>
+        <div className="hockey-gauge-card">
+          <div className="radial-gauge" style={{ "--value": productionGauge }}>
+            <span>{productionGauge}%</span>
+          </div>
 
-    <strong>Production</strong>
-    <small>{getPPG(activePlayer)} PPG</small>
-  </div>
+          <strong>Production</strong>
+          <small>{getPPG(activePlayer)} PPG</small>
+        </div>
 
-  <div className="hockey-gauge-card">
-    <div
-      className="radial-gauge"
-      style={{ "--value": qualityGauge }}
-    >
-      <span>{qualityGauge}%</span>
-    </div>
+        <div className="hockey-gauge-card">
+          <div className="radial-gauge" style={{ "--value": qualityGauge }}>
+            <span>{qualityGauge}%</span>
+          </div>
 
-    <strong>Intel Quality</strong>
-    <small>{activePlayer.enriched ? "Verified file" : "Needs enrich"}</small>
-  </div>
+          <strong>Intel Quality</strong>
+          <small>
+            {activePlayer.enriched ? "Verified file" : "Needs enrich"}
+          </small>
+        </div>
 
-  <div className="hockey-gauge-card">
-    <div
-      className="radial-gauge"
-      style={{ "--value": clampGauge(cardXP) }}
-    >
-      <span>{cardXP}</span>
-    </div>
+        <div className="hockey-gauge-card">
+          <div
+            className="radial-gauge"
+            style={{ "--value": clampGauge(cardXP) }}
+          >
+            <span>{cardXP}</span>
+          </div>
 
-    <strong>Scout XP</strong>
-    <small>{xpLevel}</small>
-  </div>
-</div>
+          <strong>Scout XP</strong>
+          <small>{xpLevel}</small>
+        </div>
+      </div>
     </div>
   );
 }

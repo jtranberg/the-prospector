@@ -276,6 +276,64 @@ router.get("/status-summary", async (req, res) => {
   }
 });
 
+// GET /api/prospects/stats/nationalities
+// Returns all nationality values currently stored in Mongo.
+// IMPORTANT: Must stay above router.get("/:eliteId").
+router.get("/stats/nationalities", async (req, res) => {
+  try {
+    const nationalities = await Prospect.aggregate([
+      {
+        $match: {
+          nationality: {
+            $exists: true,
+          },
+        },
+      },
+      {
+        $match: {
+          nationality: {
+            $ne: null,
+          },
+        },
+      },
+      {
+        $match: {
+          nationality: {
+            $ne: "",
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$nationality",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: {
+          count: -1,
+        },
+      },
+    ]);
+
+    res.json({
+      success: true,
+      count: nationalities.length,
+      nationalities: nationalities.map((item) => ({
+        nationality: item._id,
+        count: item.count,
+      })),
+    });
+  } catch (error) {
+    console.error("Nationality stats error:", error.message);
+
+    res.status(500).json({
+      error: "Nationality stats failed",
+      message: error.message,
+    });
+  }
+});
+
 // POST /api/prospects/sync
 // Manual one-page Mongo import.
 router.post("/sync", async (req, res) => {
@@ -319,7 +377,7 @@ router.post("/sync-range", async (req, res) => {
     const limit = Number(req.query.limit || 100);
     const start = Number(req.query.start || 0);
     const pages = Number(req.query.pages || 1);
-    const delayMs = Number(req.query.delayMs || 7000);
+    const delayMs = Math.max(Number(req.query.delayMs || 7000), 6500);
 
     const safeLimit = Math.min(limit, 100);
     const safePages = Math.min(pages, 10);
@@ -346,32 +404,66 @@ router.post("/sync-range", async (req, res) => {
       totalModified += result.modified;
       totalMatched += result.matched;
 
+      // Save total player count reported by Elite API
       if (result.total && !apiReportedTotal) {
         apiReportedTotal = result.total;
       }
 
-      if (result.fetched === 0) break;
+      // Stop if no more players returned
+      if (result.fetched === 0) {
+        break;
+      }
 
+      // Respect API rate limits
       if (page < safePages - 1) {
         await sleep(delayMs);
       }
     }
 
+    // Current database count AFTER sync completes
+    const dbCount = await Prospect.countDocuments();
+
+    const nextOffset = start + batches.length * safeLimit;
+
+    const progressPercent = apiReportedTotal
+      ? Number(((dbCount / apiReportedTotal) * 100).toFixed(2))
+      : null;
+
+    const remainingPlayers = apiReportedTotal
+      ? Math.max(apiReportedTotal - dbCount, 0)
+      : null;
+
     res.json({
       success: true,
       source: "elite_prospects",
       action: "sync_range",
+
       start,
       limit: safeLimit,
       requestedPages: pages,
       processedPages: batches.length,
+
       delayMs,
+
       totalFetched,
       totalUpserted,
       totalModified,
       totalMatched,
+
       apiReportedTotal,
-      nextOffset: start + batches.length * safeLimit,
+
+      databaseCount: dbCount,
+      progressPercent,
+      remainingPlayers,
+
+      nextOffset,
+
+      recommendedCommand:
+        `/api/prospects/sync-range?limit=${safeLimit}` +
+        `&start=${nextOffset}` +
+        `&pages=${safePages}` +
+        `&delayMs=${delayMs}`,
+
       batches,
     });
   } catch (error) {
@@ -386,16 +478,26 @@ router.post("/sync-range", async (req, res) => {
 
 // GET /api/prospects
 // Mongo prospect list/search.
+// GET /api/prospects
+// Mongo prospect list/search.
 router.get("/", async (req, res) => {
   try {
     const { q, league, team, position, limit = 50, page = 1 } = req.query;
 
     const filter = {};
 
-    if (q) {
+    if (q && q.trim()) {
+      const searchRegex = { $regex: q.trim(), $options: "i" };
+
       filter.$or = [
-        { name: { $regex: q, $options: "i" } },
-        { nationality: { $regex: q, $options: "i" } },
+        { name: searchRegex },
+        { nationality: searchRegex },
+        { secondaryNationality: searchRegex },
+        { team: searchRegex },
+        { position: searchRegex },
+        { league: searchRegex },
+        { teamCountry: searchRegex },
+        { placeOfBirth: searchRegex },
       ];
     }
 
@@ -403,8 +505,9 @@ router.get("/", async (req, res) => {
     if (team) filter.team = team;
     if (position) filter.position = position;
 
-    const safeLimit = Math.min(Number(limit), 100);
-    const skip = (Number(page) - 1) * safeLimit;
+    const safeLimit = Math.min(Number(limit) || 50, 100);
+    const safePage = Number(page) || 1;
+    const skip = (safePage - 1) * safeLimit;
 
     const [players, total] = await Promise.all([
       Prospect.find(filter)
@@ -419,7 +522,7 @@ router.get("/", async (req, res) => {
       source: "mongo",
       count: players.length,
       total,
-      page: Number(page),
+      page: safePage,
       limit: safeLimit,
       players,
     });
@@ -433,7 +536,6 @@ router.get("/", async (req, res) => {
     });
   }
 });
-
 // GET /api/prospects/live
 // Live Elite list. Costs Elite API calls unless cached.
 router.get("/live", async (req, res) => {
@@ -756,5 +858,7 @@ router.get("/:eliteId", async (req, res) => {
     });
   }
 });
+
+
 
 export default router;
