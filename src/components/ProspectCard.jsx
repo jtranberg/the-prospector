@@ -180,6 +180,14 @@ function getXPLevel(cardXP) {
   if (cardXP >= 50) return "Scout Follow";
   return "Developing File";
 }
+function getPositionLabel(position) {
+  const pos = String(position || "").toUpperCase();
+
+  if (pos === "D") return "🛡 DEFENSEMAN";
+  if (pos === "G") return "🥅 GOALTENDER";
+
+  return "🏒 FORWARD";
+}
 
 function ProspectCard({ player, getProspectScore }) {
   const [manualFormOpen, setManualFormOpen] = useState(false);
@@ -261,7 +269,9 @@ function ProspectCard({ player, getProspectScore }) {
     <div className={`prospect-card hockey-card ${cardTier}`}>
       <div className="hockey-card-inner">
         <div className="hockey-card-ribbon">{tierLabel}</div>
-
+        <div className="prospect-position">
+          {getPositionLabel(player.position)}
+        </div>
         <div className="hockey-card-photo">
           {activePlayer.imageUrl?.length > 0 ? (
             <img

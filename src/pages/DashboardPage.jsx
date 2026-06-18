@@ -12,6 +12,7 @@ import {
   enrichProspectById,
   loadProspectStats,
   loadNationalityStats,
+  loadPositionStats,
 } from "../lib/liveProspects";
 
 function getDatabaseMilestone(total) {
@@ -37,6 +38,9 @@ function DashboardPage({ prospects = [] }) {
   const [dbStats, setDbStats] = useState(null);
   const [statsError, setStatsError] = useState(false);
 
+  const [nationalityStats, setNationalityStats] = useState([]);
+  const [positionStats, setPositionStats] = useState([]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [activeSearchTerm, setActiveSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -50,15 +54,12 @@ function DashboardPage({ prospects = [] }) {
   const [enrichLoading, setEnrichLoading] = useState(false);
 
   const selectableProspects = hasSearched ? searchResults : prospects;
-
   const totalSearchPages = searchTotal ? Math.ceil(searchTotal / 100) : 1;
-
-  const [nationalityStats, setNationalityStats] = useState([]);
 
   const dbPlayerCount = dbStats?.total ?? null;
   const playerCountDisplay = statsError
     ? "Unavailable"
-    : (dbPlayerCount ?? "Loading...");
+    : dbPlayerCount ?? "Loading...";
 
   const loadedPlayerCount = prospects.length;
   const searchResultCount = searchResults.length;
@@ -126,6 +127,43 @@ function DashboardPage({ prospects = [] }) {
     };
   }, [prospects, loadedPlayerCount]);
 
+  const positionSummary = useMemo(() => {
+    const summary = {
+      Forwards: 0,
+      Defensemen: 0,
+      Goalies: 0,
+    };
+
+    positionStats.forEach((item) => {
+      const pos = String(item.position || "").toUpperCase();
+
+      if (
+        pos === "C" ||
+        pos === "LW" ||
+        pos === "RW" ||
+        pos === "F" ||
+        pos.includes("FORWARD")
+      ) {
+        summary.Forwards += item.count;
+      } else if (
+        pos === "D" ||
+        pos === "LD" ||
+        pos === "RD" ||
+        pos.includes("DEFENSE")
+      ) {
+        summary.Defensemen += item.count;
+      } else if (
+        pos === "G" ||
+        pos === "G\u00d6" ||
+        pos.includes("GOAL")
+      ) {
+        summary.Goalies += item.count;
+      }
+    });
+
+    return summary;
+  }, [positionStats]);
+
   const dbEnriched = dbStats?.enriched ?? 0;
   const dbCountries = dbStats?.countries ?? "Loading...";
   const dbDuplicates = dbStats?.duplicateCount ?? 0;
@@ -147,10 +185,14 @@ function DashboardPage({ prospects = [] }) {
 
   useEffect(() => {
     async function loadStats() {
-      const nationalityData = await loadNationalityStats();
-      setNationalityStats(nationalityData);
       try {
         setStatsError(false);
+
+        const nationalityData = await loadNationalityStats();
+        setNationalityStats(nationalityData);
+
+        const positionData = await loadPositionStats();
+        setPositionStats(positionData);
 
         const stats = await loadProspectStats();
         setDbStats(stats);
@@ -258,7 +300,6 @@ function DashboardPage({ prospects = [] }) {
 
   return (
     <main className="app-shell">
-      
       <section className="hero">
         <p className="eyebrow">Global Hockey Intelligence</p>
 
@@ -400,7 +441,7 @@ function DashboardPage({ prospects = [] }) {
             compact
           />
           <StatCard
-            label="Global "
+            label="Global"
             value={`${dbCountries} Countries`}
             compact
             valueStyle={{
@@ -472,6 +513,32 @@ function DashboardPage({ prospects = [] }) {
           />
         </div>
       </section>
+       <section className="dashboard-card">
+        <div className="section-header">
+          <h2>Position Distribution</h2>
+          <p>Player makeup across the global scouting database.</p>
+        </div>
+
+        <div className="selected-stat-grid">
+          <StatCard
+            label="Forwards"
+            value={positionSummary.Forwards.toLocaleString()}
+            compact
+          />
+
+          <StatCard
+            label="Defensemen"
+            value={positionSummary.Defensemen.toLocaleString()}
+            compact
+          />
+
+          <StatCard
+            label="Goalies"
+            value={positionSummary.Goalies.toLocaleString()}
+            compact
+          />
+        </div>
+      </section>
 
       <section className="dashboard-card player-selector-card">
         <div className="section-header">
@@ -482,6 +549,7 @@ function DashboardPage({ prospects = [] }) {
             optional scout intelligence where public data is missing.
           </p>
         </div>
+        
 
         <div className="search-row">
           <input
@@ -619,10 +687,13 @@ function DashboardPage({ prospects = [] }) {
       )}
 
       <ProspectCharts
-  prospects={prospects}
-  nationalityStats={nationalityStats}
-  getProspectScore={getProspectScore}
-/>
+        prospects={prospects}
+        nationalityStats={nationalityStats}
+        getProspectScore={getProspectScore}
+      />
+
+     
+
       <footer className="dashboard-footer">
         <div>
           <strong>The Prospector </strong>

@@ -113,3 +113,29 @@ export async function loadNationalityStats() {
 
   return data.nationalities || [];
 }
+
+export async function loadPositionStats() {
+  const url = `${API_BASE}/api/prospects/stats/positions`;
+
+  console.log("LOADING POSITION STATS FROM:", url);
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    const text = await response.text();
+
+    console.error("POSITION STATS REQUEST FAILED:", {
+      url,
+      status: response.status,
+      body: text,
+    });
+
+    throw new Error("Position stats unavailable");
+  }
+
+  const data = await response.json();
+
+  console.log("POSITION STATS RESPONSE:", data);
+
+  return data.positions || [];
+}

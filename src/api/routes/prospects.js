@@ -334,6 +334,38 @@ router.get("/stats/nationalities", async (req, res) => {
   }
 });
 
+router.get("/stats/positions", async (req, res) => {
+  try {
+    const positions = await Prospect.aggregate([
+      {
+        $group: {
+          _id: {
+            $ifNull: ["$position", "Unknown"],
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+    ]);
+
+    res.json({
+      success: true,
+      count: positions.length,
+      positions: positions.map((item) => ({
+        position: item._id,
+        count: item.count,
+      })),
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "Position stats failed",
+      message: error.message,
+    });
+  }
+});
+
 // POST /api/prospects/sync
 // Manual one-page Mongo import.
 router.post("/sync", async (req, res) => {
