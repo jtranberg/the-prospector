@@ -185,7 +185,6 @@ function getPositionLabel(position) {
 
   if (pos === "D") return "🛡 DEFENSEMAN";
   if (pos === "G") return "🥅 GOALTENDER";
-
   return "🏒 FORWARD";
 }
 

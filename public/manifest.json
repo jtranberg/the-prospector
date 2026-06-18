@@ -1,6 +1,6 @@
 {
-  "name": "ScoutBoard Prospector",
-  "short_name": "ScoutBoard",
+  "name": "The Prospector",
+  "short_name": "Prospector",
   "description": "Hockey prospect scouting intelligence dashboard.",
   "start_url": "/",
   "display": "standalone",
