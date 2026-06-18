@@ -4,6 +4,10 @@ import "./App.css";
 
 import DashboardPage from "./pages/DashboardPage";
 import ProspectsPage from "./pages/ProspectsPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsOfServicePage from "./pages/TermsOfServicePage";
+import CookiePolicyPage from "./pages/CookiePolicyPage";
+import ContactPage from "./pages/ContactPage";
 
 import { loadCsvProspects } from "./lib/prospectMapper";
 import { loadProspects } from "./lib/liveProspects";
@@ -68,6 +72,22 @@ function App() {
             Prospect Database
           </Link>
 
+          <Link
+            to="/privacy"
+            className="nav-pill"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Privacy
+          </Link>
+
+          <Link
+            to="/terms"
+            className="nav-pill"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Terms
+          </Link>
+
           <a
             href="https://appintelligence.ca"
             target="_blank"
@@ -90,6 +110,11 @@ function App() {
           path="/prospects"
           element={<ProspectsPage prospects={rankedProspects} />}
         />
+
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsOfServicePage />} />
+        <Route path="/cookies" element={<CookiePolicyPage />} />
+  <Route path="/contact" element={<ContactPage />} />
       </Routes>
     </>
   );

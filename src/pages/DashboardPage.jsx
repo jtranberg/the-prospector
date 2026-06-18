@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 import StatCard from "../components/StatCard";
 import ProspectCard from "../components/ProspectCard";
@@ -695,24 +696,22 @@ function DashboardPage({ prospects = [] }) {
      
 
       <footer className="dashboard-footer">
-        <div>
-          <strong>The Prospector </strong>
-          <span>Global Hockey Intelligence Platform</span>
-        </div>
+  <div className="footer-brand">
+    <strong>The Prospector</strong>
+    <span>Global Hockey Intelligence Platform</span>
+  </div>
 
-        <div>
-          <span>
-            {dbPlayerCount?.toLocaleString() || "0"} Prospects •{" "}
-            {dbCountries || 0} Countries
-          </span>
-        </div>
+  <div className="footer-links">
+    <Link to="/privacy">Privacy Policy</Link>
+    <Link to="/terms">Terms of Service</Link>
+    <Link to="/cookies">Cookie Policy</Link>
+    <Link to="/contact">Contact</Link>
+  </div>
 
-        <div>
-          <a href="https://appintelligence.ca" target="_blank" rel="noreferrer">
-            Built by App Intelligence
-          </a>
-        </div>
-      </footer>
+  <div className="footer-copy">
+    © 2026 App Intelligence
+  </div>
+</footer>
     </main>
   );
 }
