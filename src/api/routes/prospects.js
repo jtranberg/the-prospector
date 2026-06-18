@@ -16,55 +16,71 @@ function sleep(ms) {
 }
 
 // Maps Elite player records into our clean Mongo/UI shape.
+// Maps Elite player records into our clean Mongo/UI shape.
 function mapElitePlayer(player) {
   const latestStats = player.latestStats || {};
   const stats = latestStats.regularStats || {};
   const team = latestStats.team || {};
   const league = latestStats.league || {};
 
+  // Elite sometimes returns blank strings for unknown values.
+  // This helper keeps Mongo cleaner by storing null instead of "" or fake values.
+  function clean(value) {
+    return value === "" || value === undefined ? null : value;
+  }
+
   return {
     id: player.id,
 
     name:
-      player.name ||
+      clean(player.name) ||
       `${player.firstName || ""} ${player.lastName || ""}`.trim() ||
       "Unknown Player",
 
     team:
-      player.latestStats?.teamName ||
-      player.latestStats?.team?.name ||
-      player.latestTeam?.name ||
-      player.team?.name ||
+      clean(player.latestStats?.teamName) ||
+      clean(player.latestStats?.team?.name) ||
+      clean(player.latestTeam?.name) ||
+      clean(player.team?.name) ||
       "Team unavailable",
 
     league:
-      player.latestStats?.leagueName ||
-      player.latestStats?.league?.name ||
-      player.latestLeague?.name ||
-      player.league?.name ||
+      clean(player.latestStats?.leagueName) ||
+      clean(player.latestStats?.league?.name) ||
+      clean(player.latestLeague?.name) ||
+      clean(player.league?.name) ||
       "League unavailable",
 
-    position: player.position || player.detailedPosition?.[0] || "N/A",
+    position: clean(player.position) || player.detailedPosition?.[0] || "N/A",
 
-    playerType: player.playerType || "N/A",
-    statusText: player.status || "N/A",
-    gameStatus: player.gameStatus || "N/A",
+    playerType: clean(player.playerType) || null,
+    statusText: clean(player.status) || null,
+    gameStatus: clean(player.gameStatus) || null,
 
-    age: player.age || 0,
-    yearOfBirth: player.yearOfBirth || null,
-    dateOfBirth: player.dateOfBirth || null,
+    // Missing age should be null, not 0.
+    age: clean(player.age) || null,
+    yearOfBirth: clean(player.yearOfBirth) || null,
+    dateOfBirth: clean(player.dateOfBirth) || null,
 
-    nationality: player.nationality?.name || player.nationality || "Unknown",
-    secondaryNationality: player.secondaryNationality?.name || null,
-    placeOfBirth: player.placeOfBirth || null,
+    nationality:
+      clean(player.nationality?.name) || clean(player.nationality) || "Unknown",
 
-    shoots: player.shoots || player.catches || "N/A",
-    handednessLabel: player.catches ? "Catches" : "Shoots",
+    secondaryNationality:
+      clean(player.secondaryNationality?.name) ||
+      clean(player.secondaryNationality) ||
+      null,
 
-    height: player.height?.metrics || null,
-    heightImperial: player.height?.imperial || null,
-    weight: player.weight?.metrics || null,
-    weightImperial: player.weight?.imperial || null,
+    placeOfBirth: clean(player.placeOfBirth) || null,
+
+    // Missing shoots/catches should be null.
+    // The UI can display N/A.
+    shoots: clean(player.shoots) || clean(player.catches) || null,
+    handednessLabel: clean(player.catches) ? "Catches" : "Shoots",
+
+    height: clean(player.height?.metrics) || null,
+    heightImperial: clean(player.height?.imperial) || null,
+    weight: clean(player.weight?.metrics) || null,
+    weightImperial: clean(player.weight?.imperial) || null,
 
     games: stats.GP ?? 0,
     goals: stats.G ?? 0,
@@ -74,26 +90,29 @@ function mapElitePlayer(player) {
     ppg: stats.PPG ?? null,
     plusMinus: stats.PM ?? null,
 
-    season: latestStats.season?.slug || "N/A",
-    jerseyNumber: latestStats.jerseyNumber || null,
-    leagueLevel: league.leagueLevel || null,
-    leagueType: latestStats.leagueType || league.leagueType || null,
-    teamCountry: team.country?.name || null,
+    season: clean(latestStats.season?.slug) || "N/A",
+    jerseyNumber: clean(latestStats.jerseyNumber) || null,
+    leagueLevel: clean(league.leagueLevel) || null,
+    leagueType:
+      clean(latestStats.leagueType) || clean(league.leagueType) || null,
+    teamCountry: clean(team.country?.name) || null,
 
-    imageUrl: player.imageUrl || null,
+    imageUrl: clean(player.imageUrl) || null,
+
     eliteUrl:
-      player.links?.eliteprospectsUrl ||
-      player._links?.eliteprospectsUrl ||
-      null,
+      clean(player.links?.eliteprospectsUrl) ||
+      clean(player._links?.eliteprospectsUrl) ||
+      (player.eliteprospectsUrlPath
+        ? `https://www.eliteprospects.com${player.eliteprospectsUrlPath}`
+        : null),
 
-    eliteUpdatedAt: player.updatedAt || null,
+    eliteUpdatedAt: clean(player.updatedAt) || null,
 
     status: "Watch",
     upside: "Medium",
     source: "elite_prospects",
   };
 }
-
 // Preserves our mapped fields plus the raw Elite payload.
 function normalizeProspectForMongo(player) {
   const mapped = mapElitePlayer(player);
@@ -186,15 +205,17 @@ router.get("/stats", async (req, res) => {
   try {
     const total = await Prospect.countDocuments();
 
-    const uniqueIds = (await Prospect.distinct("eliteId")).filter(Boolean)
-      .length;
+    const uniqueIds = (await Prospect.distinct("eliteId")).filter(
+      Boolean,
+    ).length;
 
     const enriched = await Prospect.countDocuments({
       enriched: true,
     });
 
-    const countries = (await Prospect.distinct("nationality")).filter(Boolean)
-      .length;
+    const countries = (await Prospect.distinct("nationality")).filter(
+      Boolean,
+    ).length;
 
     const duplicateGroups = await Prospect.aggregate([
       {
@@ -501,6 +522,28 @@ router.post("/enrich/:id", async (req, res) => {
 
     const data = JSON.parse(rawText);
     const rawPlayer = data?.data || data;
+    console.log("=================================");
+    console.log("ELITE DETAIL PLAYER");
+    console.log("ID:", eliteId);
+    console.log("TOP LEVEL KEYS:");
+    console.log(Object.keys(rawPlayer || {}));
+
+    console.log("HEIGHT:");
+    console.dir(rawPlayer.height, { depth: 5 });
+
+    console.log("WEIGHT:");
+    console.dir(rawPlayer.weight, { depth: 5 });
+
+    console.log("BIRTH:");
+    console.log(rawPlayer.dateOfBirth);
+    console.log(rawPlayer.yearOfBirth);
+
+    console.log("SHOOTS:");
+    console.log(rawPlayer.shoots);
+
+    console.log("FULL PLAYER SAMPLE:");
+    console.dir(rawPlayer, { depth: 4 });
+    console.log("=================================");
 
     const prospect = normalizeProspectForMongo(rawPlayer);
 
@@ -621,6 +664,70 @@ router.get("/probe", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       error: error.message,
+    });
+  }
+});
+
+// PATCH /api/prospects/:eliteId/manual
+// Saves scout-entered manual data into MongoDB.
+// This does NOT update Elite Prospects.
+// Manual fields are our app-level scouting intelligence layer.
+router.patch("/:eliteId/manual", async (req, res) => {
+  try {
+    const { eliteId } = req.params;
+
+   const {
+  manualHeight,
+  manualWeight,
+  manualShoots,
+  manualBirthYear,
+  manualDateOfBirth,
+  manualAge,
+  manualPlusMinus,
+  manualJerseyNumber,
+  manualNotes,
+} = req.body;
+
+    const updated = await Prospect.findOneAndUpdate(
+      { eliteId: String(eliteId) },
+      {
+        $set: {
+          manualHeight: manualHeight || null,
+          manualWeight: manualWeight || null,
+          manualShoots: manualShoots || null,
+          manualBirthYear: manualBirthYear || null,
+          manualDateOfBirth: manualDateOfBirth || null,
+          manualAge: manualAge || null,
+          manualPlusMinus: manualPlusMinus || null,
+          manualJerseyNumber: manualJerseyNumber || null,
+          manualNotes: manualNotes || null,
+          manualUpdatedAt: new Date(),
+        },
+      },
+      {
+        new: true,
+      },
+    ).lean();
+
+    if (!updated) {
+      return res.status(404).json({
+        error: "Prospect not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      source: "mongo",
+      action: "manual_update",
+      eliteId: String(eliteId),
+      prospect: updated,
+    });
+  } catch (error) {
+    console.error("Manual prospect update error:", error.message);
+
+    res.status(500).json({
+      error: "Manual update failed",
+      message: error.message,
     });
   }
 });

@@ -1,5 +1,3 @@
-
-
 export function getPPGValue(player) {
   const games = Number(player?.games || 0);
   const points = Number(player?.points || 0);
@@ -13,10 +11,16 @@ export function getPPG(player) {
   return getPPGValue(player).toFixed(2);
 }
 
+// Scores the player while reducing tiny-sample noise.
+// A 2.00 PPG player over 1 game should look interesting,
+// but not outrank a strong player with a real sample.
 export function getProspectScore(player) {
+  const games = Number(player?.games || 0);
   const ppg = getPPGValue(player);
 
-  const ageBonus = player.age <= 16 ? 20 : player.age === 17 ? 12 : 5;
+  const age = Number(player?.age || 99);
+
+  const ageBonus = age <= 16 ? 20 : age === 17 ? 12 : 5;
 
   const upsideBonus =
     player.upside === "Elite" ? 25 :
@@ -29,15 +33,30 @@ export function getProspectScore(player) {
     player.position === "G" ? 5 :
     3;
 
-  const penaltyRisk = player.pim > 35 ? 8 : 0;
+  const penaltyRisk = Number(player?.pim || 0) > 35 ? 8 : 0;
 
-  return Math.round(
-    ppg * 40 +
+  // Confidence increases as game sample grows.
+  // 1 game = 25% confidence
+  // 5 games = 45%
+  // 10 games = 65%
+  // 20+ games = full confidence
+  const sampleConfidence =
+    games >= 20 ? 1 :
+    games >= 10 ? 0.65 :
+    games >= 5 ? 0.45 :
+    games >= 1 ? 0.25 :
+    0;
+
+  const productionScore = ppg * 40 * sampleConfidence;
+
+  const rawScore =
+    productionScore +
     ageBonus +
     upsideBonus +
     positionBonus -
-    penaltyRisk
-  );
+    penaltyRisk;
+
+  return Math.min(Math.round(rawScore), 100);
 }
 
 export function getProspectRank(score) {

@@ -31,7 +31,8 @@ function ProspectCharts({ prospects, getProspectScore }) {
                 stroke="rgba(148,163,184,0.12)"
                 strokeDasharray="3 3"
               />
-              <XAxis dataKey="name" tick={{ fill: "#94a3b8", fontSize: 12 }} />
+              <XAxis dataKey="name" tick={false} axisLine={false} />
+              <Tooltip labelFormatter={(name) => `Player: ${name}`} />
               <YAxis tick={{ fill: "#94a3b8", fontSize: 12 }} />
               <Tooltip />
               <Bar dataKey="score" fill="#60a5fa" radius={[8, 8, 0, 0]} />
@@ -50,7 +51,8 @@ function ProspectCharts({ prospects, getProspectScore }) {
                 stroke="rgba(148,163,184,0.12)"
                 strokeDasharray="3 3"
               />
-              <XAxis dataKey="name" tick={{ fill: "#94a3b8", fontSize: 12 }} />
+              <XAxis dataKey="name" tick={false} axisLine={false} />
+              <Tooltip labelFormatter={(name) => `Player: ${name}`} />
               <YAxis tick={{ fill: "#94a3b8", fontSize: 12 }} />
               <Tooltip />
               <Line

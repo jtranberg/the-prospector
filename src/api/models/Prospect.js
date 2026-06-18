@@ -2,6 +2,57 @@ import mongoose from "mongoose";
 
 const prospectSchema = new mongoose.Schema(
   {
+    // Manual scout-entered data.
+    // These fields belong to our app/MongoDB, not Elite Prospects.
+
+    manualBirthYear: {
+      type: String,
+      default: null,
+    },
+
+    manualDateOfBirth: {
+      type: String,
+      default: null,
+    },
+
+    manualAge: {
+      type: String,
+      default: null,
+    },
+
+    manualPlusMinus: {
+      type: String,
+      default: null,
+    },
+
+    manualJerseyNumber: {
+      type: String,
+      default: null,
+    },
+    manualHeight: {
+      type: String,
+      default: null,
+    },
+
+    manualWeight: {
+      type: String,
+      default: null,
+    },
+
+    manualShoots: {
+      type: String,
+      default: null,
+    },
+
+    manualNotes: {
+      type: String,
+      default: null,
+    },
+
+    manualUpdatedAt: {
+      type: Date,
+      default: null,
+    },
     eliteId: { type: String, required: true, unique: true, index: true },
 
     enriched: Boolean,

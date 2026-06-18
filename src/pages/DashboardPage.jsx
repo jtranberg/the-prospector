@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import StatCard from "../components/StatCard";
 import ProspectCard from "../components/ProspectCard";
@@ -18,20 +18,24 @@ function DashboardPage({ prospects = [] }) {
   const [selectedPlayerDetail, setSelectedPlayerDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
-  // Database stats come from /api/prospects/stats.
+  // Database-level stats come from /api/prospects/stats.
+  // These represent the real MongoDB collection, not just the loaded page list.
   const [dbStats, setDbStats] = useState(null);
   const [statsError, setStatsError] = useState(false);
 
+  // Search state controls the prospect selector.
+  // When search results exist, the dropdown switches to those results.
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+
+  // Enrichment state gives the button a proper loading state.
   const [enrichLoading, setEnrichLoading] = useState(false);
 
-  // Search results control the dropdown when present.
-  // Otherwise the dropdown uses the loaded prospects list.
+  // Search results become the active working list when present.
+  // Otherwise we use the loaded prospects passed into the dashboard.
   const selectableProspects = searchResults.length ? searchResults : prospects;
 
   // True Mongo player count.
-  // This is separate from loaded list count and search result count.
   const dbPlayerCount = dbStats?.total ?? null;
   const playerCountDisplay = statsError
     ? "Unavailable"
@@ -40,19 +44,97 @@ function DashboardPage({ prospects = [] }) {
   const loadedPlayerCount = prospects.length;
   const searchResultCount = searchResults.length;
 
+  // Selected player can come from search results or the default loaded list.
   const selectedPlayer = selectableProspects.find(
     (player) =>
       String(player.eliteId || player.id) === String(selectedPlayerId),
   );
 
+  // If full Mongo detail has been loaded, use it.
+  // Otherwise show the lighter selected player record.
   const displayPlayer = selectedPlayerDetail || selectedPlayer;
-  const topProspect = prospects[0];
 
-  // Scout XP is based on currently loaded prospects, not the full DB.
+  // Scout XP is currently based on loaded records.
+  // Later this can become DB-level reviewed/enriched totals.
   const scoutXP = getScoutXP(prospects);
   const scoutLevel = getScoutLevel(scoutXP);
 
-  // Load database-level stats once when dashboard opens.
+  // Turns raw prospect records into dashboard intelligence.
+  const intelligence = useMemo(() => {
+    const scoredProspects = prospects.map((player) => {
+      const score = getProspectScore(player);
+      const ppg = Number(getPPG(player)) || 0;
+
+      return {
+        ...player,
+        scoutScore: score,
+        scoutPPG: ppg,
+      };
+    });
+
+    const inviteNow = scoredProspects.filter(
+      (player) => player.scoutScore >= 80,
+    );
+
+    const watchClosely = scoredProspects.filter(
+      (player) => player.scoutScore >= 60 && player.scoutScore < 80,
+    );
+
+    const needsData = scoredProspects.filter(
+      (player) => !player.enriched || player.games === 0,
+    );
+
+    const hiddenGems = scoredProspects.filter(
+      (player) => player.scoutPPG >= 1 && player.scoutScore >= 70,
+    );
+
+    const topProspect = scoredProspects.reduce((best, player) => {
+      if (!best) return player;
+      return player.scoutScore > best.scoutScore ? player : best;
+    }, null);
+
+    const topScorer = scoredProspects.reduce((best, player) => {
+      if (!best) return player;
+      return (player.points ?? 0) > (best.points ?? 0) ? player : best;
+    }, null);
+
+    const bestPPG = scoredProspects.reduce((best, player) => {
+      if (!best) return player;
+      return player.scoutPPG > best.scoutPPG ? player : best;
+    }, null);
+
+    const enrichedCount = scoredProspects.filter((player) => player.enriched)
+      .length;
+
+    const coveragePercent = loadedPlayerCount
+      ? Math.round((enrichedCount / loadedPlayerCount) * 100)
+      : 0;
+
+    return {
+      scoredProspects,
+      inviteNow,
+      watchClosely,
+      needsData,
+      hiddenGems,
+      topProspect,
+      topScorer,
+      bestPPG,
+      enrichedCount,
+      coveragePercent,
+    };
+  }, [prospects, loadedPlayerCount]);
+
+  const decisionMessage =
+    intelligence.inviteNow.length > 0
+      ? `${intelligence.inviteNow.length} players are showing invite-level signals.`
+      : "No invite-level signals yet. Keep enriching and reviewing.";
+
+  const missionMessage =
+    intelligence.hiddenGems.length > 0
+      ? `${intelligence.hiddenGems.length} possible hidden gems are worth a second look.`
+      : "The board is waiting for more enriched profiles to reveal hidden gems.";
+
+  // Load database stats once when the dashboard opens.
   useEffect(() => {
     async function loadStats() {
       try {
@@ -69,6 +151,7 @@ function DashboardPage({ prospects = [] }) {
     loadStats();
   }, []);
 
+  // Runs a Mongo-backed prospect search.
   async function handleSearch() {
     try {
       const results = await searchProspects(searchTerm, 100);
@@ -79,6 +162,7 @@ function DashboardPage({ prospects = [] }) {
     }
   }
 
+  // Enriches the selected player, reloads detail, then refreshes DB stats.
   async function handleEnrich() {
     if (!selectedPlayerId) return;
 
@@ -90,7 +174,6 @@ function DashboardPage({ prospects = [] }) {
       const detail = await loadProspectById(selectedPlayerId);
       setSelectedPlayerDetail(detail);
 
-      // Refresh stats after enrichment.
       const stats = await loadProspectStats();
       setDbStats(stats);
       setStatsError(false);
@@ -101,7 +184,7 @@ function DashboardPage({ prospects = [] }) {
     }
   }
 
-  // Load full Mongo player detail when a prospect is selected.
+  // Loads full Mongo player detail when a prospect is selected.
   useEffect(() => {
     if (!selectedPlayerId) return;
 
@@ -136,32 +219,60 @@ function DashboardPage({ prospects = [] }) {
     <main className="app-shell">
       <section className="hero">
         <p className="eyebrow">App Intelligence for Hockey Operations</p>
+
+        <h1>ScoutBoard Intelligence</h1>
+
         <p>
-          Prospect tracking, player intelligence, and junior hockey workflow in
-          one clean dashboard.
+          Turn raw Elite Prospects data into hockey decisions: invite targets,
+          watch-list players, hidden gems, and profiles that need more data.
         </p>
       </section>
 
       <section className="stats-grid">
-        <StatCard label="Players" value={playerCountDisplay} />
-
+        <StatCard label="Mongo Players" value={playerCountDisplay} />
         <StatCard label="Loaded List" value={loadedPlayerCount} />
-
         <StatCard label="Search Results" value={searchResultCount} />
-
-        <StatCard
-          label="Invite Targets"
-          value={prospects.filter((p) => p.status === "Invite").length}
-        />
+        <StatCard label="Invite Now" value={intelligence.inviteNow.length} />
 
         <StatCard
           label="Top Score"
-          value={topProspect ? getProspectScore(topProspect) : 0}
+          value={
+            intelligence.topProspect
+              ? getProspectScore(intelligence.topProspect)
+              : 0
+          }
         />
 
         <StatCard label="Scout XP" value={scoutXP} />
-
         <StatCard label="Scout Level" value={scoutLevel} compact />
+      </section>
+
+      <section className="dashboard-card intelligence-card">
+        <div className="section-header">
+          <h2>Decision Intelligence</h2>
+          <p>{decisionMessage}</p>
+        </div>
+
+        <div className="selected-stat-grid">
+          <StatCard label="Invite Now" value={intelligence.inviteNow.length} compact />
+          <StatCard label="Watch Closely" value={intelligence.watchClosely.length} compact />
+          <StatCard label="Needs Data" value={intelligence.needsData.length} compact />
+          <StatCard label="Hidden Gems" value={intelligence.hiddenGems.length} compact />
+        </div>
+      </section>
+
+      <section className="dashboard-card scout-mission-card">
+        <div className="section-header">
+          <h2>Scout Mission</h2>
+          <p>{missionMessage}</p>
+        </div>
+
+        <div className="selected-stat-grid">
+          <StatCard label="Scout XP" value={scoutXP} compact />
+          <StatCard label="Scout Level" value={scoutLevel} compact />
+          <StatCard label="Intel Coverage" value={`${intelligence.coveragePercent}%`} compact />
+          <StatCard label="Enriched Loaded" value={intelligence.enrichedCount} compact />
+        </div>
       </section>
 
       <section className="dashboard-card player-selector-card">
@@ -186,7 +297,7 @@ function DashboardPage({ prospects = [] }) {
           />
 
           <StatCard
-            label="Enriched"
+            label="DB Enriched"
             value={statsError ? "Unavailable" : dbStats?.enriched ?? 0}
             compact
           />
@@ -200,10 +311,10 @@ function DashboardPage({ prospects = [] }) {
 
         <div className="search-row">
           <input
-            className="player-select"
-            placeholder="Search by name or country..."
+            className="scout-input"
+            placeholder="Search by name, country, team, or position..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(event) => setSearchTerm(event.target.value)}
           />
 
           <button className="button-link" type="button" onClick={handleSearch}>
@@ -212,22 +323,23 @@ function DashboardPage({ prospects = [] }) {
         </div>
 
         <select
-          className="player-select"
+          className="scout-input"
           value={selectedPlayerId}
-          onChange={(e) => {
+          onChange={(event) => {
             setSelectedPlayerDetail(null);
-            setSelectedPlayerId(e.target.value);
+            setSelectedPlayerId(event.target.value);
           }}
         >
           <option value="">Choose a prospect...</option>
 
           {selectableProspects.map((player) => {
             const playerId = player.eliteId || player.id;
+            const score = getProspectScore(player);
 
             return (
               <option key={playerId} value={String(playerId)}>
-                #{playerId} — {player.name || "Unknown Player"} —{" "}
-                {player.nationality || "Nationality unavailable"} —{" "}
+                #{playerId} — {player.name || "Unknown Player"} — Score {score}{" "}
+                — {player.nationality || "Nationality unavailable"} —{" "}
                 {player.position || "N/A"}
               </option>
             );
@@ -241,149 +353,34 @@ function DashboardPage({ prospects = [] }) {
         </section>
       )}
 
+      {/* Selected player view.
+          ProspectCard is now the single source of truth for player detail,
+          so the old duplicate player-detail-card has been removed. */}
       {displayPlayer && (
-        <>
-          <section className="prospect-grid single-prospect-grid">
-            <ProspectCard
-              player={displayPlayer}
-              getProspectScore={getProspectScore}
-            />
-          </section>
+        <section className="prospect-grid single-prospect-grid">
+          <ProspectCard
+            player={displayPlayer}
+            getProspectScore={getProspectScore}
+          />
 
-          <section className="dashboard-card player-detail-card">
+          <div className="dashboard-card">
             <div className="section-header">
-              <h2>{displayPlayer.name || "Unknown Player"}</h2>
+              <h2>Player Actions</h2>
 
               <p>
-                {displayPlayer.team || "Team unavailable"} •{" "}
-                {displayPlayer.league || "League unavailable"} •{" "}
-                {displayPlayer.position || "N/A"} • Age{" "}
-                {displayPlayer.age || "N/A"}
+                Enrich this player from Elite Prospects when you need deeper
+                profile data before making a scouting decision.
               </p>
-
-              <button
-                className="button-link"
-                type="button"
-                onClick={handleEnrich}
-                disabled={enrichLoading}
-              >
-                {enrichLoading ? "Enriching..." : "Enrich Selected Player"}
-              </button>
             </div>
 
-            <div className="selected-score">
-              <span>Prospect Score</span>
-              <strong>{getProspectScore(displayPlayer)}</strong>
-            </div>
-
-            <div className="selected-stat-grid">
-              <StatCard label="Games" value={displayPlayer.games ?? 0} compact />
-              <StatCard label="Goals" value={displayPlayer.goals ?? 0} compact />
-              <StatCard label="Assists" value={displayPlayer.assists ?? 0} compact />
-              <StatCard label="Points" value={displayPlayer.points ?? 0} compact />
-
-              <StatCard
-                label="Profile"
-                value={displayPlayer.enriched ? "Enriched" : "Basic"}
-                compact
-              />
-
-              <StatCard
-                label="Birthplace"
-                value={displayPlayer.placeOfBirth || "N/A"}
-                compact
-              />
-
-              <StatCard
-                label="Birth Year"
-                value={displayPlayer.yearOfBirth || "N/A"}
-                compact
-              />
-
-              <StatCard
-                label="DOB"
-                value={displayPlayer.dateOfBirth || "N/A"}
-                compact
-              />
-
-              <StatCard
-                label="League Level"
-                value={displayPlayer.leagueLevel || "N/A"}
-                compact
-              />
-
-              <StatCard
-                label="League Type"
-                value={displayPlayer.leagueType || "N/A"}
-                compact
-              />
-
-              <StatCard
-                label="Team Country"
-                value={displayPlayer.teamCountry || "N/A"}
-                compact
-              />
-
-              <StatCard
-                label="Game Status"
-                value={displayPlayer.gameStatus || "N/A"}
-                compact
-              />
-
-              <StatCard
-                label="Elite ID"
-                value={displayPlayer.eliteId || displayPlayer.id || "N/A"}
-                compact
-              />
-
-              <StatCard
-                label="PPG"
-                value={displayPlayer.ppg ?? getPPG(displayPlayer)}
-                compact
-              />
-
-              <StatCard label="PIM" value={displayPlayer.pim ?? 0} compact />
-
-              <StatCard
-                label="Nationality"
-                value={displayPlayer.nationality || "N/A"}
-                compact
-              />
-
-              <StatCard
-                label="Height"
-                value={displayPlayer.heightImperial || "N/A"}
-                compact
-              />
-
-              <StatCard
-                label="Weight"
-                value={
-                  displayPlayer.weightImperial
-                    ? `${displayPlayer.weightImperial} lb`
-                    : "N/A"
-                }
-                compact
-              />
-
-              <StatCard
-                label={displayPlayer.handednessLabel || "Shoots"}
-                value={displayPlayer.shoots || "N/A"}
-                compact
-              />
-
-              <StatCard
-                label="Season"
-                value={displayPlayer.season || "N/A"}
-                compact
-              />
-
-              <StatCard
-                label="Jersey"
-                value={displayPlayer.jerseyNumber || "N/A"}
-                compact
-              />
-            </div>
+            <button
+              className="button-link"
+              type="button"
+              onClick={handleEnrich}
+              disabled={enrichLoading}
+            >
+              {enrichLoading ? "Enriching..." : "Enrich Selected Player"}
+            </button>
 
             {displayPlayer.eliteUrl && (
               <a
@@ -395,14 +392,17 @@ function DashboardPage({ prospects = [] }) {
                 View Elite Prospects Profile
               </a>
             )}
-          </section>
-
-          <ProspectCharts
-            prospects={[displayPlayer]}
-            getProspectScore={getProspectScore}
-          />
-        </>
+          </div>
+        </section>
       )}
+
+      {/* Global prospect charts.
+          This keeps the second chart set only,
+          using the loaded/scored prospect list instead of a single selected player. */}
+      <ProspectCharts
+        prospects={intelligence.scoredProspects}
+        getProspectScore={getProspectScore}
+      />
     </main>
   );
 }
