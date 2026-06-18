@@ -90,6 +90,7 @@ export function getCountryCode(nationality) {
     "North Korea": "KP",
     Egypt: "EG",
     Brazil: "BR",
+    "Cayman Islands": "KY",
 
     // Elite uses older/common hockey naming.
     Macedonia: "MK",
@@ -109,7 +110,20 @@ export function getCountryCode(nationality) {
     Zimbabwe: "ZW",
     Peru: "PE",
     Venezuela: "VE",
+
+
+    // alternates
+    // Common alternate names
+"Bosnia and Herzegovina": "BA",
+"Congo DR": "CD",
+"DR Congo": "CD",
+"Republic of Korea": "KR",
+"Korea, South": "KR",
+"Korea, North": "KP",
+"Czech Republic": "CZ",
+
+"Taiwan": "TW",
   };
 
-  return countries[nationality] || null;
+  return countries[nationality?.trim()] || null;
 }
