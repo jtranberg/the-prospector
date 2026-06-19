@@ -304,7 +304,7 @@ function DashboardPage({ prospects = [] }) {
       <section className="hero">
         <p className="eyebrow">Global Hockey Intelligence</p>
 
-        <h1>The Prospector</h1>
+        <h1>DVAE HALL'S <br></br>Prospector</h1>
 
         <p>
           Turn a global prospect database into today’s shortlist: invite
@@ -697,7 +697,7 @@ function DashboardPage({ prospects = [] }) {
 
       <footer className="dashboard-footer">
   <div className="footer-brand">
-    <strong>The Prospector</strong>
+    <strong>DAVE HALL"S Prospector</strong>
     <span>Global Hockey Intelligence Platform</span>
   </div>
 
