@@ -198,6 +198,8 @@ async function syncElitePage({ limit, offset }) {
   };
 }
 
+
+
 // GET /api/prospects/stats
 // Dashboard database totals.
 // IMPORTANT: This must stay above router.get("/:eliteId").
@@ -248,6 +250,32 @@ router.get("/stats", async (req, res) => {
 
     res.status(500).json({
       error: "Stats unavailable",
+      message: error.message,
+    });
+  }
+});
+
+router.get("/countries", async (req, res) => {
+  try {
+    const countries = await Prospect.aggregate([
+      {
+        $group: {
+          _id: "$nationality",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+    ]);
+
+    res.json({
+      totalCountries: countries.length,
+      countries,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to load countries",
       message: error.message,
     });
   }
@@ -971,5 +999,6 @@ router.get("/:eliteId", async (req, res) => {
     });
   }
 });
+
 
 export default router;
