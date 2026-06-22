@@ -514,7 +514,15 @@ router.post("/sync-range", async (req, res) => {
 // Mongo prospect list/search.
 router.get("/", async (req, res) => {
   try {
-    const { q, league, team, position, limit = 50, page = 1 } = req.query;
+    const {
+      q,
+      league,
+      team,
+      position,
+      sort = "points",
+      limit = 50,
+      page = 1,
+    } = req.query;
 
     const filter = {};
 
@@ -538,12 +546,83 @@ router.get("/", async (req, res) => {
     if (position) filter.position = position;
 
     const safeLimit = Math.min(Number(limit) || 50, 100);
-    const safePage = Number(page) || 1;
+    const safePage = Math.max(Number(page) || 1, 1);
     const skip = (safePage - 1) * safeLimit;
+
+    let sortOption = {
+      points: -1,
+      goals: -1,
+      assists: -1,
+      name: 1,
+    };
+
+    switch (sort) {
+      case "goals":
+        sortOption = {
+          goals: -1,
+          points: -1,
+          name: 1,
+        };
+        break;
+
+      case "assists":
+        sortOption = {
+          assists: -1,
+          points: -1,
+          name: 1,
+        };
+        break;
+
+      case "ppg":
+        sortOption = {
+          ppg: -1,
+          points: -1,
+          name: 1,
+        };
+        break;
+
+      case "age":
+        sortOption = {
+          age: -1,
+          points: -1,
+          name: 1,
+        };
+        break;
+
+      case "name":
+        sortOption = {
+          name: 1,
+        };
+        break;
+
+      case "recent":
+        sortOption = {
+          syncedAt: -1,
+          name: 1,
+        };
+        break;
+
+      case "points":
+      default:
+        sortOption = {
+          points: -1,
+          goals: -1,
+          assists: -1,
+          name: 1,
+        };
+        break;
+    }
+
+    console.log("Mongo prospect sort:", {
+      sort,
+      sortOption,
+      page: safePage,
+      limit: safeLimit,
+    });
 
     const [players, total] = await Promise.all([
       Prospect.find(filter)
-        .sort({ points: -1, goals: -1, assists: -1, name: 1 })
+        .sort(sortOption)
         .skip(skip)
         .limit(safeLimit)
         .lean(),
@@ -556,6 +635,8 @@ router.get("/", async (req, res) => {
       total,
       page: safePage,
       limit: safeLimit,
+      totalPages: Math.ceil(total / safeLimit),
+      sort,
       players,
     });
   } catch (error) {
@@ -890,7 +971,5 @@ router.get("/:eliteId", async (req, res) => {
     });
   }
 });
-
-
 
 export default router;

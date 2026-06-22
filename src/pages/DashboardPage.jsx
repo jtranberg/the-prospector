@@ -304,10 +304,10 @@ function DashboardPage({ prospects = [] }) {
       <section className="hero">
         <p className="eyebrow">Global Hockey Intelligence</p>
 
-        <h1>DVAE HALL'S <br></br>Prospector</h1>
+        <h1>DAVE HALL'S <br></br>Prospector</h1>
 
         <p>
-          Turn a global prospect database into today’s shortlist: invite
+          Turning a global prospect database into today’s shortlist: invite
           targets, watch-list players, hidden gems, and profiles that need scout
           intelligence.
         </p>

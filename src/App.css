@@ -1621,3 +1621,43 @@ td small {
   color: #69a3eb;
 }
 
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.sort-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+}
+
+.sort-control span {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.sort-control select {
+  min-width: 180px;
+  padding: 10px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: rgba(246, 247, 248, 0.911);
+  color: #010811;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+
+  cursor: pointer;
+}

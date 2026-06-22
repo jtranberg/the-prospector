@@ -52,6 +52,36 @@ export async function searchProspects(query, limit = 100, page = 1) {
   };
 }
 
+export async function loadProspectPage({
+  page = 1,
+  limit = 50,
+  sort = "points",
+} = {}) {
+  const url = `${API_BASE}/api/prospects?page=${page}&limit=${limit}&sort=${sort}`;
+
+  console.log("LOADING PROSPECT PAGE FROM:", url);
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    const text = await response.text();
+
+    console.error("PROSPECT PAGE REQUEST FAILED:", {
+      url,
+      status: response.status,
+      body: text,
+    });
+
+    throw new Error("Prospect page unavailable");
+  }
+
+  const data = await response.json();
+
+  console.log("MONGO PROSPECT PAGE RESPONSE:", data);
+
+  return data;
+}
+
 export async function enrichProspectById(id) {
   const response = await fetch(`${API_BASE}/api/prospects/enrich/${id}`, {
     method: "POST",
