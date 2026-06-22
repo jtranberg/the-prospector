@@ -15,12 +15,14 @@ export function getCountryCode(nationality) {
     Slovakia: "SK",
     Bangladesh: "BD",
     Bermuda: "BM",
-Kenya: "KE",
-Monaco: "MC",
+    Kenya: "KE",
+    Monaco: "MC",
 
     "Costa Rica": "CR",
     Namibia: "NA",
     Paraguay: "PY",
+
+    Cambodia: "KH",
 
     // UK / home nations
     England: "GB-ENG",
