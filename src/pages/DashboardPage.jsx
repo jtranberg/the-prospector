@@ -54,6 +54,8 @@ function DashboardPage({ prospects = [] }) {
 
   const [enrichLoading, setEnrichLoading] = useState(false);
 
+  
+
   const selectableProspects = hasSearched ? searchResults : prospects;
   const totalSearchPages = searchTotal ? Math.ceil(searchTotal / 100) : 1;
 
@@ -206,10 +208,14 @@ function DashboardPage({ prospects = [] }) {
     loadStats();
   }, []);
 
+  const [showGreeting, setShowGreeting] = useState(() => {
+  return localStorage.getItem("scoutboard-welcome-dismissed") !== "true";
+});
+
   const databaseMilestone = getDatabaseMilestone(dbPlayerCount);
   const pipelineHealth = getPipelineHealth(dbCoveragePercent);
   const globalProgress = dbPlayerCount
-    ? Math.min(Math.round((dbPlayerCount / 100000) * 100), 100)
+    ? Math.min(Math.round((dbPlayerCount / 200000) * 100), 100)
     : 0;
 
   async function handleSearch(page = 1) {
@@ -299,12 +305,86 @@ function DashboardPage({ prospects = [] }) {
     };
   }, [selectedPlayerId]);
 
+  
+
   return (
     <main className="app-shell">
+
+  {showGreeting && (
+    <div className="modal-backdrop">
+      <section className="case-modal greeting-modal">
+        <h2>🏒 Welcome to ScoutBoard</h2>
+
+        <p>
+          Welcome to the Dave Hall's Global Hockey Intelligence Platform.
+          The Prospector currently contains over <strong>167,000 hockey prospects
+          from 101 countries</strong> and continues to grow.
+        </p>
+
+        <h3>Getting Started</h3>
+
+        <ul>
+          <li>
+            🔍 <strong>Use The Dropdown Quick Search</strong>to select a player
+          </li>
+          <li>
+            🔍 <strong>Search</strong> by player name, country, team, or
+            position.
+          </li>
+
+          <li>
+            📄 Select a player to load their profile from the local database.
+          </li>
+
+          <li>
+            ⚡ Click <strong>Enrich Player</strong> to download additional Elite
+            Prospects data into the database.
+          </li>
+
+          <li>
+            📊 Explore the dashboard charts and scouting analytics to identify
+            prospects and hidden gems.
+          </li>
+        </ul>
+
+        <h3>Demo Notice</h3>
+
+        <p>
+          This demonstration is hosted on a free backend. If the server has been
+          idle it may take 30–60 seconds to wake up before data becomes
+          available.
+        </p>
+
+        <div className="modal-actions">
+          <button
+            className="button-link"
+            onClick={() => setShowGreeting(false)}
+          >
+            Dismiss
+          </button>
+
+          <button
+            className="button-link"
+            onClick={() => {
+              localStorage.setItem(
+                "scoutboard-welcome-dismissed",
+                "true"
+              );
+              setShowGreeting(false);
+            }}
+          >
+            Don't Show Again
+          </button>
+        </div>
+      </section>
+    </div>
+  )}
+
+  {/* existing page continues... */}
       <section className="hero">
         <p className="eyebrow">Global Hockey Intelligence</p>
 
-        <h1>DAVE HALL'S <br></br>Prospector</h1>
+        <h1>DAVE HALL'S <br></br>Prospector Insights</h1>
 
         <p>
           Turning a global prospect database into today’s shortlist: invite
@@ -331,7 +411,7 @@ function DashboardPage({ prospects = [] }) {
       <section className="dashboard-card war-room-card">
         <div className="war-room-content">
           <div>
-            <p className="eyebrow">ScoutBoard War Room</p>
+            <p className="eyebrow">Prospector War Room</p>
 
             <h2>{databaseMilestone}</h2>
 
@@ -351,7 +431,7 @@ function DashboardPage({ prospects = [] }) {
               <span>{globalProgress}%</span>
             </div>
 
-            <strong>100k Target</strong>
+            <strong>200k Target</strong>
             <small>{pipelineHealth}</small>
           </div>
         </div>
@@ -715,5 +795,4 @@ function DashboardPage({ prospects = [] }) {
     </main>
   );
 }
-
 export default DashboardPage;

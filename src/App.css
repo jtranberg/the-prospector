@@ -867,6 +867,10 @@ td small {
   margin-bottom: 14px;
 }
 
+.scout-input::placeholder{
+  color: #91ccf3;
+}
+
 .scout-input,
 .scout-textarea {
   width: 100%;

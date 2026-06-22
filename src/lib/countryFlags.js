@@ -14,6 +14,10 @@ export function getCountryCode(nationality) {
     France: "FR",
     Slovakia: "SK",
 
+    "Costa Rica": "CR",
+    Namibia: "NA",
+    Paraguay: "PY",
+
     // UK / home nations
     England: "GB-ENG",
     Scotland: "GB-SCT",
