@@ -13,6 +13,7 @@ export function getCountryCode(nationality) {
     Finland: "FI",
     France: "FR",
     Slovakia: "SK",
+    Bangladesh: "BD",
 
     "Costa Rica": "CR",
     Namibia: "NA",
