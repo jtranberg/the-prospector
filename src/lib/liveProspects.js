@@ -33,23 +33,40 @@ export async function loadProspectById(id) {
   return data;
 }
 
-export async function searchProspects(query, limit = 100, page = 1) {
-  const response = await fetch(
-    `${API_BASE}/api/prospects?q=${encodeURIComponent(
-      query,
-    )}&limit=${limit}&page=${page}`,
-  );
+export async function searchProspects(q, limit = 100, page = 1, sort = "name") {
+  const cleanQ = String(q || "").trim();
 
-  if (!response.ok) throw new Error("Prospect search unavailable");
+  const params = new URLSearchParams({
+    q: cleanQ,
+    limit: String(limit),
+    page: String(page),
+    sort,
+  });
+
+  const url = `${API_BASE}/api/prospects/search?${params.toString()}`;
+
+  console.log("SEARCH TERM:", cleanQ);
+  console.log("SEARCH URL:", url);
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    const text = await response.text();
+
+    console.error("SEARCH REQUEST FAILED:", {
+      url,
+      status: response.status,
+      body: text,
+    });
+
+    throw new Error("Search unavailable");
+  }
 
   const data = await response.json();
 
-  return {
-    players: data.players || [],
-    total: data.total || 0,
-    page: data.page || page,
-    limit: data.limit || limit,
-  };
+  console.log("SEARCH RESPONSE:", data);
+
+  return data;
 }
 
 export async function loadProspectPage({

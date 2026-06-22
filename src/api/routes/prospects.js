@@ -536,11 +536,12 @@ router.post("/sync-range", async (req, res) => {
   }
 });
 
+
+// Shared Mongo prospect search/list handler.
+// Used by both:
 // GET /api/prospects
-// Mongo prospect list/search.
-// GET /api/prospects
-// Mongo prospect list/search.
-router.get("/", async (req, res) => {
+// GET /api/prospects/search
+async function searchProspects(req, res) {
   try {
     const {
       q,
@@ -554,99 +555,71 @@ router.get("/", async (req, res) => {
 
     const filter = {};
 
-    if (q && q.trim()) {
-      const searchRegex = { $regex: q.trim(), $options: "i" };
+   if (q && String(q).trim()) {
+  const cleanQ = String(q).trim();
+  const normalizedQ = cleanQ.replace(/[-_]+/g, " ");
+  const searchRegex = { $regex: normalizedQ, $options: "i" };
+  const numericQ = Number(cleanQ);
 
-      filter.$or = [
-        { name: searchRegex },
-        { nationality: searchRegex },
-        { secondaryNationality: searchRegex },
-        { team: searchRegex },
-        { position: searchRegex },
-        { league: searchRegex },
-        { teamCountry: searchRegex },
-        { placeOfBirth: searchRegex },
-      ];
-    }
+  filter.$or = [
+    // Exact Elite ID search.
+    { eliteId: cleanQ },
 
-    if (league) filter.league = league;
-    if (team) filter.team = team;
-    if (position) filter.position = position;
+    // Numeric app/Elite ID search.
+    ...(Number.isNaN(numericQ) ? [] : [{ id: numericQ }]),
+
+    // Text search.
+    { name: searchRegex },
+    { nationality: searchRegex },
+    { secondaryNationality: searchRegex },
+    { team: searchRegex },
+    { position: searchRegex },
+    { league: searchRegex },
+    { teamCountry: searchRegex },
+    { placeOfBirth: searchRegex },
+  ];
+}
+
+    if (league) filter.league = { $regex: league, $options: "i" };
+    if (team) filter.team = { $regex: team, $options: "i" };
+    if (position) filter.position = { $regex: position, $options: "i" };
 
     const safeLimit = Math.min(Number(limit) || 50, 100);
     const safePage = Math.max(Number(page) || 1, 1);
     const skip = (safePage - 1) * safeLimit;
 
-    let sortOption = {
-      points: -1,
-      goals: -1,
-      assists: -1,
-      name: 1,
-    };
+    let sortOption;
 
     switch (sort) {
       case "goals":
-        sortOption = {
-          goals: -1,
-          points: -1,
-          name: 1,
-        };
+        sortOption = { goals: -1, points: -1, name: 1 };
         break;
 
       case "assists":
-        sortOption = {
-          assists: -1,
-          points: -1,
-          name: 1,
-        };
+        sortOption = { assists: -1, points: -1, name: 1 };
         break;
 
       case "ppg":
-        sortOption = {
-          ppg: -1,
-          points: -1,
-          name: 1,
-        };
+        sortOption = { ppg: -1, points: -1, name: 1 };
         break;
 
       case "age":
-        sortOption = {
-          age: -1,
-          points: -1,
-          name: 1,
-        };
+        sortOption = { age: -1, points: -1, name: 1 };
         break;
 
       case "name":
-        sortOption = {
-          name: 1,
-        };
+        sortOption = { name: 1 };
         break;
 
       case "recent":
-        sortOption = {
-          syncedAt: -1,
-          name: 1,
-        };
+        sortOption = { syncedAt: -1, name: 1 };
         break;
 
       case "points":
       default:
-        sortOption = {
-          points: -1,
-          goals: -1,
-          assists: -1,
-          name: 1,
-        };
+        sortOption = { points: -1, goals: -1, assists: -1, name: 1 };
         break;
     }
-
-    console.log("Mongo prospect sort:", {
-      sort,
-      sortOption,
-      page: safePage,
-      limit: safeLimit,
-    });
 
     const [players, total] = await Promise.all([
       Prospect.find(filter)
@@ -668,15 +641,22 @@ router.get("/", async (req, res) => {
       players,
     });
   } catch (error) {
-    console.error("Mongo prospects error:", error.message);
+    console.error("Mongo prospect search error:", error.message);
 
     res.status(500).json({
-      error: "Prospects unavailable",
+      error: "Prospect search failed",
       message: error.message,
       players: [],
     });
   }
-});
+}
+
+// Keep these ABOVE router.get("/:eliteId")
+router.get("/", searchProspects);
+router.get("/search", searchProspects);
+
+
+
 // GET /api/prospects/live
 // Live Elite list. Costs Elite API calls unless cached.
 router.get("/live", async (req, res) => {

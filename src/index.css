@@ -181,3 +181,46 @@ code {
   font-size: 1.5rem;
   cursor: pointer;
 }
+
+.search-results-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.search-result-card {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
+  color: inherit;
+  cursor: pointer;
+}
+
+.search-result-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.search-result-card span {
+  display: block;
+  margin-top: 4px;
+  opacity: 0.75;
+  font-size: 0.9rem;
+}
+
+.search-result-score {
+  text-align: right;
+  min-width: 64px;
+}
+
+.search-result-score small {
+  display: block;
+  opacity: 0.65;
+}

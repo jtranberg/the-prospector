@@ -48,13 +48,17 @@ function DashboardPage({ prospects = [] }) {
   const [searchPage, setSearchPage] = useState(1);
   const [searchTotal, setSearchTotal] = useState(0);
 
+  const [manualEliteId, setManualEliteId] = useState("");
+
   const [hasSearched, setHasSearched] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
 
   const [enrichLoading, setEnrichLoading] = useState(false);
 
-  
+  const [showGreeting, setShowGreeting] = useState(() => {
+    return localStorage.getItem("scoutboard-welcome-dismissed") !== "true";
+  });
 
   const selectableProspects = hasSearched ? searchResults : prospects;
   const totalSearchPages = searchTotal ? Math.ceil(searchTotal / 100) : 1;
@@ -62,7 +66,7 @@ function DashboardPage({ prospects = [] }) {
   const dbPlayerCount = dbStats?.total ?? null;
   const playerCountDisplay = statsError
     ? "Unavailable"
-    : dbPlayerCount ?? "Loading...";
+    : (dbPlayerCount ?? "Loading...");
 
   const loadedPlayerCount = prospects.length;
   const searchResultCount = searchResults.length;
@@ -155,11 +159,7 @@ function DashboardPage({ prospects = [] }) {
         pos.includes("DEFENSE")
       ) {
         summary.Defensemen += item.count;
-      } else if (
-        pos === "G" ||
-        pos === "G\u00d6" ||
-        pos.includes("GOAL")
-      ) {
+      } else if (pos === "G" || pos === "GÖ" || pos.includes("GOAL")) {
         summary.Goalies += item.count;
       }
     });
@@ -186,6 +186,13 @@ function DashboardPage({ prospects = [] }) {
       ? `${intelligence.hiddenGems.length} possible hidden gems are worth a second look.`
       : "Search, enrich, and add scout intel to turn the database into a decision board.";
 
+  const databaseMilestone = getDatabaseMilestone(dbPlayerCount);
+  const pipelineHealth = getPipelineHealth(dbCoveragePercent);
+
+  const globalProgress = dbPlayerCount
+    ? Math.min(Math.round((dbPlayerCount / 200000) * 100), 100)
+    : 0;
+
   useEffect(() => {
     async function loadStats() {
       try {
@@ -208,18 +215,15 @@ function DashboardPage({ prospects = [] }) {
     loadStats();
   }, []);
 
-  const [showGreeting, setShowGreeting] = useState(() => {
-  return localStorage.getItem("scoutboard-welcome-dismissed") !== "true";
-});
+  async function handleSearch(page = 1, termOverride = null) {
+    const cleanSearch = String(termOverride ?? searchTerm).trim();
 
-  const databaseMilestone = getDatabaseMilestone(dbPlayerCount);
-  const pipelineHealth = getPipelineHealth(dbCoveragePercent);
-  const globalProgress = dbPlayerCount
-    ? Math.min(Math.round((dbPlayerCount / 200000) * 100), 100)
-    : 0;
-
-  async function handleSearch(page = 1) {
-    const cleanSearch = searchTerm.trim();
+    console.log("DASHBOARD SEARCH:", {
+      cleanSearch,
+      searchTerm,
+      termOverride,
+      page,
+    });
 
     if (!cleanSearch) {
       setHasSearched(false);
@@ -239,21 +243,36 @@ function DashboardPage({ prospects = [] }) {
       setSelectedPlayerId("");
       setSelectedPlayerDetail(null);
 
-      const data = await searchProspects(cleanSearch, 100, page);
+      const data = await searchProspects(cleanSearch, 100, page, "name");
+      const players = data.players || [];
 
-      setSearchResults(data.players);
-      setSearchTotal(data.total);
-      setSearchPage(data.page);
+      setSearchResults(players);
+      setSearchTotal(data.total || 0);
+      setSearchPage(data.page || page);
       setActiveSearchTerm(cleanSearch);
+
+      // If search finds exactly one prospect, open the card automatically.
+      if (players.length === 1) {
+        const player = players[0];
+        const playerId = String(player.eliteId || player.id);
+
+        setSelectedPlayerId(playerId);
+
+        const detail = await loadProspectById(playerId);
+        setSelectedPlayerDetail(detail);
+      }
     } catch (error) {
       console.error("Unable to search prospects:", error);
+
       setSearchResults([]);
+      setSearchTotal(0);
+      setSelectedPlayerId("");
+      setSelectedPlayerDetail(null);
       setSearchError("Search unavailable. Check API connection.");
     } finally {
       setSearchLoading(false);
     }
   }
-
   async function handleEnrich() {
     if (!selectedPlayerId) return;
 
@@ -270,6 +289,43 @@ function DashboardPage({ prospects = [] }) {
       setStatsError(false);
     } catch (error) {
       console.error("Unable to enrich player:", error);
+    } finally {
+      setEnrichLoading(false);
+    }
+  }
+
+  async function handleImportByEliteId() {
+    const cleanId = manualEliteId.trim();
+
+    if (!cleanId) return;
+
+    try {
+      setEnrichLoading(true);
+      setSearchError("");
+      setSelectedPlayerId("");
+      setSelectedPlayerDetail(null);
+
+      await enrichProspectById(cleanId);
+
+      const detail = await loadProspectById(cleanId);
+
+      setSelectedPlayerId(cleanId);
+      setSelectedPlayerDetail(detail);
+
+      setHasSearched(true);
+      setSearchResults([detail]);
+      setSearchTotal(1);
+      setSearchPage(1);
+      setActiveSearchTerm(`Elite ID ${cleanId}`);
+
+      const stats = await loadProspectStats();
+      setDbStats(stats);
+      setStatsError(false);
+
+      setManualEliteId("");
+    } catch (error) {
+      console.error("Unable to import Elite player:", error);
+      setSearchError("Could not import that Elite Prospects ID.");
     } finally {
       setEnrichLoading(false);
     }
@@ -305,86 +361,86 @@ function DashboardPage({ prospects = [] }) {
     };
   }, [selectedPlayerId]);
 
-  
-
   return (
     <main className="app-shell">
+      {showGreeting && (
+        <div className="modal-backdrop">
+          <section className="case-modal greeting-modal">
+            <h2>🏒 Welcome to ScoutBoard</h2>
 
-  {showGreeting && (
-    <div className="modal-backdrop">
-      <section className="case-modal greeting-modal">
-        <h2>🏒 Welcome to ScoutBoard</h2>
+            <p>
+              Welcome to the Dave Hall's Global Hockey Intelligence Platform.
+              The Prospector currently contains over{" "}
+              <strong>184,000 hockey prospects from 106 countries</strong> and
+              continues to grow.
+            </p>
 
-        <p>
-          Welcome to the Dave Hall's Global Hockey Intelligence Platform.
-          The Prospector currently contains over <strong>167,000 hockey prospects
-          from 101 countries</strong> and continues to grow.
-        </p>
+            <h3>Getting Started</h3>
 
-        <h3>Getting Started</h3>
+            <ul>
+              <li>
+                🔍 <strong>Use The Dropdown Quick Search</strong> to select a
+                player.
+              </li>
+              <li>
+                🔍 <strong>Search</strong> by player name, country, team, or
+                position.
+              </li>
+              <li>
+                🆔 <strong>Import by Elite ID</strong> when a known player is
+                missing from the local database.
+              </li>
+              <li>
+                📄 Select a player to load their profile from the local
+                database.
+              </li>
+              <li>
+                ⚡ Click <strong>Enrich Player</strong> to download additional
+                Elite Prospects data into the database.
+              </li>
+              <li>
+                📊 Explore the dashboard charts and scouting analytics to
+                identify prospects and hidden gems.
+              </li>
+            </ul>
 
-        <ul>
-          <li>
-            🔍 <strong>Use The Dropdown Quick Search</strong>to select a player
-          </li>
-          <li>
-            🔍 <strong>Search</strong> by player name, country, team, or
-            position.
-          </li>
+            <h3>Demo Notice</h3>
 
-          <li>
-            📄 Select a player to load their profile from the local database.
-          </li>
+            <p>
+              This demonstration is hosted on a free backend. If the server has
+              been idle it may take 30–60 seconds to wake up before data becomes
+              available.
+            </p>
 
-          <li>
-            ⚡ Click <strong>Enrich Player</strong> to download additional Elite
-            Prospects data into the database.
-          </li>
+            <div className="modal-actions">
+              <button
+                className="button-link"
+                onClick={() => setShowGreeting(false)}
+              >
+                Dismiss
+              </button>
 
-          <li>
-            📊 Explore the dashboard charts and scouting analytics to identify
-            prospects and hidden gems.
-          </li>
-        </ul>
-
-        <h3>Demo Notice</h3>
-
-        <p>
-          This demonstration is hosted on a free backend. If the server has been
-          idle it may take 30–60 seconds to wake up before data becomes
-          available.
-        </p>
-
-        <div className="modal-actions">
-          <button
-            className="button-link"
-            onClick={() => setShowGreeting(false)}
-          >
-            Dismiss
-          </button>
-
-          <button
-            className="button-link"
-            onClick={() => {
-              localStorage.setItem(
-                "scoutboard-welcome-dismissed",
-                "true"
-              );
-              setShowGreeting(false);
-            }}
-          >
-            Don't Show Again
-          </button>
+              <button
+                className="button-link"
+                onClick={() => {
+                  localStorage.setItem("scoutboard-welcome-dismissed", "true");
+                  setShowGreeting(false);
+                }}
+              >
+                Don't Show Again
+              </button>
+            </div>
+          </section>
         </div>
-      </section>
-    </div>
-  )}
+      )}
 
-  {/* existing page continues... */}
       <section className="hero">
         <p className="eyebrow">Global Hockey Intelligence</p>
 
-        <h1>DAVE HALL'S <br></br>Prospector Insights</h1>
+        <h1>
+          DAVE HALL'S <br />
+          Prospector Insights
+        </h1>
 
         <p>
           Turning a global prospect database into today’s shortlist: invite
@@ -594,7 +650,8 @@ function DashboardPage({ prospects = [] }) {
           />
         </div>
       </section>
-       <section className="dashboard-card">
+
+      <section className="dashboard-card">
         <div className="section-header">
           <h2>Position Distribution</h2>
           <p>Player makeup across the global scouting database.</p>
@@ -626,11 +683,10 @@ function DashboardPage({ prospects = [] }) {
           <h2>Scouting Intelligence Center</h2>
 
           <p>
-            Search the database, select a prospect, enrich the profile, then add
-            optional scout intelligence where public data is missing.
+            Search the database, select a prospect, enrich the profile, or
+            import a missing player directly by Elite Prospects ID.
           </p>
         </div>
-        
 
         <div className="search-row">
           <input
@@ -654,6 +710,29 @@ function DashboardPage({ prospects = [] }) {
           </button>
         </div>
 
+        <div className="search-row">
+          <input
+            className="scout-input"
+            placeholder="Import by Elite ID, e.g. 201473..."
+            value={manualEliteId}
+            onChange={(event) => setManualEliteId(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                handleImportByEliteId();
+              }
+            }}
+          />
+
+          <button
+            className="button-link"
+            type="button"
+            onClick={handleImportByEliteId}
+            disabled={enrichLoading}
+          >
+            {enrichLoading ? "Importing..." : "Import Elite ID"}
+          </button>
+        </div>
+
         {searchLoading && <p className="muted">Searching database...</p>}
 
         {searchError && <p className="error-text">{searchError}</p>}
@@ -671,7 +750,7 @@ function DashboardPage({ prospects = [] }) {
               className="button-link"
               type="button"
               disabled={searchPage <= 1}
-              onClick={() => handleSearch(searchPage - 1)}
+              onClick={() => handleSearch(searchPage - 1, activeSearchTerm)}
             >
               ◀ Previous 100
             </button>
@@ -684,36 +763,46 @@ function DashboardPage({ prospects = [] }) {
               className="button-link"
               type="button"
               disabled={searchPage >= totalSearchPages}
-              onClick={() => handleSearch(searchPage + 1)}
+              onClick={() => handleSearch(searchPage + 1, activeSearchTerm)}
             >
               Next 100 ▶
             </button>
           </div>
         )}
 
-        <select
-          className="scout-input"
-          value={selectedPlayerId}
-          onChange={(event) => {
-            setSelectedPlayerDetail(null);
-            setSelectedPlayerId(event.target.value);
-          }}
-        >
-          <option value="">Choose a prospect...</option>
+        {/* Only show the selector when there is more than one result */}
+        {selectableProspects.length > 1 && (
+  <select
+    className="scout-input"
+    value={selectedPlayerId}
+    onChange={async (event) => {
+      const playerId = event.target.value;
 
-          {selectableProspects.map((player) => {
-            const playerId = player.eliteId || player.id;
-            const score = getProspectScore(player);
+      setSelectedPlayerId(playerId);
+      setSelectedPlayerDetail(null);
 
-            return (
-              <option key={playerId} value={String(playerId)}>
-                #{playerId} — {player.name || "Unknown Player"} — Score {score}{" "}
-                — {player.nationality || "Nationality unavailable"} —{" "}
-                {player.position || "N/A"}
-              </option>
-            );
-          })}
-        </select>
+      if (!playerId) return;
+
+      const detail = await loadProspectById(playerId);
+      setSelectedPlayerDetail(detail);
+    }}
+  >
+    <option value="">Choose a prospect...</option>
+
+    {selectableProspects.map((player) => {
+      const playerId = player.eliteId || player.id;
+      const score = getProspectScore(player);
+
+      return (
+        <option key={playerId} value={String(playerId)}>
+          #{playerId} — {player.name || "Unknown Player"} — Score {score} —{" "}
+          {player.nationality || "Nationality unavailable"} —{" "}
+          {player.position || "N/A"}
+        </option>
+      );
+    })}
+  </select>
+)}
       </section>
 
       {detailLoading && (
@@ -773,26 +862,23 @@ function DashboardPage({ prospects = [] }) {
         getProspectScore={getProspectScore}
       />
 
-     
-
       <footer className="dashboard-footer">
-  <div className="footer-brand">
-    <strong>DAVE HALL"S Prospector</strong>
-    <span>Global Hockey Intelligence Platform</span>
-  </div>
+        <div className="footer-brand">
+          <strong>DAVE HALL&apos;S Prospector</strong>
+          <span>Global Hockey Intelligence Platform</span>
+        </div>
 
-  <div className="footer-links">
-    <Link to="/privacy">Privacy Policy</Link>
-    <Link to="/terms">Terms of Service</Link>
-    <Link to="/cookies">Cookie Policy</Link>
-    <Link to="/contact">Contact</Link>
-  </div>
+        <div className="footer-links">
+          <Link to="/privacy">Privacy Policy</Link>
+          <Link to="/terms">Terms of Service</Link>
+          <Link to="/cookies">Cookie Policy</Link>
+          <Link to="/contact">Contact</Link>
+        </div>
 
-  <div className="footer-copy">
-    © 2026 App Intelligence
-  </div>
-</footer>
+        <div className="footer-copy">© 2026 App Intelligence</div>
+      </footer>
     </main>
   );
 }
+
 export default DashboardPage;
