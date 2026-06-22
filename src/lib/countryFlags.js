@@ -14,6 +14,9 @@ export function getCountryCode(nationality) {
     France: "FR",
     Slovakia: "SK",
     Bangladesh: "BD",
+    Bermuda: "BM",
+Kenya: "KE",
+Monaco: "MC",
 
     "Costa Rica": "CR",
     Namibia: "NA",
