@@ -18,6 +18,8 @@ export function getCountryCode(nationality) {
     Kenya: "KE",
     Monaco: "MC",
 
+    Cuba: "CU",
+
     Ecuador: "EC",
     "Costa Rica": "CR",
     Namibia: "NA",

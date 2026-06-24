@@ -224,3 +224,56 @@ code {
   display: block;
   opacity: 0.65;
 }
+
+/* ==========================================================
+   Story Finder Button
+   One-click Google research for podcast content.
+   ========================================================== */
+
+.story-button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px 18px;
+
+  border: 1px solid rgba(0, 191, 255, 0.45);
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(0, 140, 255, 0.18),
+    rgba(0, 70, 180, 0.28)
+  );
+
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  box-shadow: 0 6px 18px rgba(0, 120, 255, 0.18);
+}
+
+.story-button:hover {
+  transform: translateY(-2px);
+
+  border-color: #42b8ff;
+
+  background: linear-gradient(
+    135deg,
+    rgba(0, 170, 255, 0.35),
+    rgba(0, 90, 220, 0.45)
+  );
+
+  box-shadow: 0 10px 24px rgba(0, 150, 255, 0.35);
+}
+
+.story-button:active {
+  transform: scale(0.98);
+}
+
+.story-button:focus-visible {
+  outline: 2px solid #42b8ff;
+  outline-offset: 2px;
+}

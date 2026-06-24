@@ -146,6 +146,7 @@ function getScoreClass(score) {
   return "score-low";
 }
 
+// Converts score into the visual card tier class.
 function getCardTier(score) {
   if (score >= 90) return "platinum";
   if (score >= 80) return "diamond";
@@ -154,6 +155,7 @@ function getCardTier(score) {
   return "bronze";
 }
 
+// Converts score into a display ribbon.
 function getTierLabel(score) {
   if (score >= 90) return "👑 Platinum Elite";
   if (score >= 80) return "💎 Diamond Target";
@@ -180,6 +182,8 @@ function getXPLevel(cardXP) {
   if (cardXP >= 50) return "Scout Follow";
   return "Developing File";
 }
+
+// Converts compact position values into readable labels.
 function getPositionLabel(position) {
   const pos = String(position || "").toUpperCase();
 
@@ -188,8 +192,59 @@ function getPositionLabel(position) {
   return "🏒 FORWARD";
 }
 
+// Creates an in-app podcast brief using only known Mongo/player data.
+// This gives Dave a useful talking-point card even when Google finds very little.
+function getPodcastBrief(player, ppg, score, decision, intelBadge) {
+  const position = player.position || "N/A";
+  const team = player.team || "Unknown Team";
+  const league = player.league || "Unknown League";
+  const birthplace = player.placeOfBirth || player.nationality || "Unknown hometown";
+
+  const knownForParts = [];
+
+  if (formatHeight(player) !== "N/A") {
+    knownForParts.push(formatHeight(player));
+  }
+
+  if (formatShoots(player) !== "N/A") {
+    knownForParts.push(`${formatShoots(player).toLowerCase()} shot`);
+  }
+
+  if (position !== "N/A") {
+    knownForParts.push(position);
+  }
+
+  const knownFor =
+    knownForParts.length > 0
+      ? `${knownForParts.join(" ")} with ${ppg} PPG.`
+      : `Developing ${position} with ${ppg} PPG.`;
+
+  const storyAngle = `${birthplace} prospect currently developing with ${team} in ${league}.`;
+
+  const talkingPoints = [
+    `Age: ${formatAge(player)}`,
+    `Position: ${position}`,
+    `Team: ${team}`,
+    `League: ${league}`,
+    `Birthplace: ${player.placeOfBirth || "N/A"}`,
+    `Size: ${formatHeight(player)}, ${formatWeight(player)}`,
+    `Shoots/Catches: ${formatShoots(player)}`,
+    `Production: ${player.points ?? 0} points in ${player.games ?? 0} games`,
+    `Prospect score: ${score}`,
+    `Recommendation: ${decision}`,
+    `Intel badge: ${intelBadge}`,
+  ];
+
+  return {
+    knownFor,
+    storyAngle,
+    talkingPoints,
+  };
+}
+
 function ProspectCard({ player, getProspectScore }) {
   const [manualFormOpen, setManualFormOpen] = useState(false);
+  const [briefOpen, setBriefOpen] = useState(false);
   const [manualSaving, setManualSaving] = useState(false);
   const [savedManual, setSavedManual] = useState(null);
   const [manualForm, setManualForm] = useState(() => buildManualForm(player));
@@ -227,6 +282,19 @@ function ProspectCard({ player, getProspectScore }) {
   const qualityGauge = clampGauge(dataQuality);
   const xpLevel = getXPLevel(cardXP);
 
+  const cardTier = getCardTier(score);
+  const tierLabel = getTierLabel(score);
+
+  // Builds the podcast brief once per render from the active player data.
+  const podcastBrief = getPodcastBrief(
+    activePlayer,
+    ppg,
+    score,
+    decision,
+    intelBadge,
+  );
+
+  // Saves manual scout intelligence back to MongoDB.
   async function handleManualSave() {
     if (!eliteId) return;
 
@@ -261,16 +329,37 @@ function ProspectCard({ player, getProspectScore }) {
     }
   }
 
-  const cardTier = getCardTier(score);
-  const tierLabel = getTierLabel(score);
+  // Opens a targeted Google search for podcast research.
+  // This is intentionally external for now; later it can become a Gemini/backend endpoint.
+  function handleStoryFinder() {
+    const query = encodeURIComponent(
+      [
+        `"${activePlayer.name}"`,
+        "hockey",
+        activePlayer.team,
+        activePlayer.league,
+        "(interview OR biography OR profile OR hometown OR family OR story)",
+      ]
+        .filter(Boolean)
+        .join(" "),
+    );
+
+    window.open(
+      `https://www.google.com/search?q=${query}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+  }
 
   return (
     <div className={`prospect-card hockey-card ${cardTier}`}>
       <div className="hockey-card-inner">
         <div className="hockey-card-ribbon">{tierLabel}</div>
+
         <div className="prospect-position">
           {getPositionLabel(player.position)}
         </div>
+
         <div className="hockey-card-photo">
           {activePlayer.imageUrl?.length > 0 ? (
             <img
@@ -358,7 +447,96 @@ function ProspectCard({ player, getProspectScore }) {
         >
           {manualFormOpen ? "Close Intel" : "Add Scout Intel ⭐"}
         </button>
+
+        <button
+          className="story-button"
+          type="button"
+          onClick={() => setBriefOpen((open) => !open)}
+        >
+          🎙 {briefOpen ? "Close Podcast Brief" : "Podcast Brief"}
+        </button>
+
+        <button
+          className="story-button"
+          type="button"
+          onClick={handleStoryFinder}
+        >
+          🔍 Research Online
+        </button>
       </div>
+
+      {briefOpen && (
+        <div className="podcast-brief-panel">
+          <span className="podcast-brief-title">🎙 Podcast Brief</span>
+
+          <h4>{activePlayer.name || "Unknown Player"}</h4>
+
+          <p className="podcast-brief-subtitle">
+            {activePlayer.position || "N/A"} •{" "}
+            {activePlayer.team || "Unknown Team"} •{" "}
+            {activePlayer.league || "Unknown League"}
+          </p>
+
+          <div className="podcast-brief-grid">
+            <div>
+              <span>Age</span>
+              <strong>{formatAge(activePlayer)}</strong>
+            </div>
+
+            <div>
+              <span>Height</span>
+              <strong>{formatHeight(activePlayer)}</strong>
+            </div>
+
+            <div>
+              <span>Weight</span>
+              <strong>{formatWeight(activePlayer)}</strong>
+            </div>
+
+            <div>
+              <span>Shoots</span>
+              <strong>{formatShoots(activePlayer)}</strong>
+            </div>
+
+            <div>
+              <span>Birthplace</span>
+              <strong>{activePlayer.placeOfBirth || "N/A"}</strong>
+            </div>
+
+            <div>
+              <span>Nationality</span>
+              <strong>{activePlayer.nationality || "N/A"}</strong>
+            </div>
+          </div>
+
+          <div className="podcast-brief-section">
+            <strong>Known For</strong>
+            <p>{podcastBrief.knownFor}</p>
+          </div>
+
+          <div className="podcast-brief-section">
+            <strong>Story Angle</strong>
+            <p>{podcastBrief.storyAngle}</p>
+          </div>
+
+          <div className="podcast-brief-section">
+            <strong>Talking Points</strong>
+            <ul>
+              {podcastBrief.talkingPoints.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+          </div>
+
+          <button
+            className="story-button"
+            type="button"
+            onClick={handleStoryFinder}
+          >
+            🔍 Research Online
+          </button>
+        </div>
+      )}
 
       <details className="hockey-card-details" open>
         <summary>Full Scouting File</summary>

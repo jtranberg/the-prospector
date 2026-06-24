@@ -190,7 +190,7 @@ function DashboardPage({ prospects = [] }) {
   const pipelineHealth = getPipelineHealth(dbCoveragePercent);
 
   const globalProgress = dbPlayerCount
-    ? Math.min(Math.round((dbPlayerCount / 200000) * 100), 100)
+    ? Math.min(Math.round((dbPlayerCount / 250000) * 100), 100)
     : 0;
 
   useEffect(() => {
@@ -371,7 +371,7 @@ function DashboardPage({ prospects = [] }) {
             <p>
               Welcome to the Dave Hall's Global Hockey Intelligence Platform.
               The Prospector currently contains over{" "}
-              <strong>184,000 hockey prospects from 106 countries</strong> and
+              <strong>204,000+ hockey prospects from 107 countries</strong> and
               continues to grow.
             </p>
 
@@ -487,7 +487,7 @@ function DashboardPage({ prospects = [] }) {
               <span>{globalProgress}%</span>
             </div>
 
-            <strong>200k Target</strong>
+            <strong>250k Target</strong>
             <small>{pipelineHealth}</small>
           </div>
         </div>
