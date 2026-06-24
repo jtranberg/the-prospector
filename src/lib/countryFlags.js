@@ -18,6 +18,7 @@ export function getCountryCode(nationality) {
     Kenya: "KE",
     Monaco: "MC",
 
+    Ecuador: "EC",
     "Costa Rica": "CR",
     Namibia: "NA",
     Paraguay: "PY",
@@ -121,18 +122,17 @@ export function getCountryCode(nationality) {
     Peru: "PE",
     Venezuela: "VE",
 
-
     // alternates
     // Common alternate names
-"Bosnia and Herzegovina": "BA",
-"Congo DR": "CD",
-"DR Congo": "CD",
-"Republic of Korea": "KR",
-"Korea, South": "KR",
-"Korea, North": "KP",
-"Czech Republic": "CZ",
+    "Bosnia and Herzegovina": "BA",
+    "Congo DR": "CD",
+    "DR Congo": "CD",
+    "Republic of Korea": "KR",
+    "Korea, South": "KR",
+    "Korea, North": "KP",
+    "Czech Republic": "CZ",
 
-"Taiwan": "TW",
+    Taiwan: "TW",
   };
 
   return countries[nationality?.trim()] || null;
