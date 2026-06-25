@@ -17,6 +17,7 @@ import {
 } from "../lib/liveProspects";
 
 import WorldProspectMap from "../components/WorldProspectMap";
+import { publishPlayerCard } from "../lib/publisher";
 
 function getDatabaseMilestone(total) {
   if (!total) return "Building Dataset";
@@ -830,26 +831,36 @@ function DashboardPage({ prospects = [] }) {
             </div>
 
             <div className="hockey-card-actions">
-              <button
-                className="button-link"
-                type="button"
-                onClick={handleEnrich}
-                disabled={enrichLoading}
-              >
-                {enrichLoading ? "Enriching..." : "Enrich Player"}
-              </button>
 
-              {displayPlayer.eliteUrl && (
-                <a
-                  href={displayPlayer.eliteUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="button-link"
-                >
-                  Elite Profile
-                </a>
-              )}
-            </div>
+  <button
+    className="button-link"
+    type="button"
+    onClick={handleEnrich}
+    disabled={enrichLoading}
+  >
+    {enrichLoading ? "Enriching..." : "Enrich Player"}
+  </button>
+
+  <button
+    className="button-link publish-button"
+    type="button"
+    onClick={() => publishPlayerCard(displayPlayer.name)}
+  >
+    Publish Card
+  </button>
+
+  {displayPlayer.eliteUrl && (
+    <a
+      href={displayPlayer.eliteUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="button-link"
+    >
+      Elite Profile
+    </a>
+  )}
+
+</div>
           </div>
 
           <div className="hockey-card-frame">

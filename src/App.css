@@ -1738,3 +1738,103 @@ td small {
 
   object-fit: cover;
 }
+
+.publish-button {
+  border: 1px solid rgba(110, 168, 255, 0.35);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  background: linear-gradient(
+    135deg,
+    rgba(110, 168, 255, 0.18),
+    rgba(59, 130, 246, 0.12)
+  );
+
+  color: #dbeafe;
+  box-shadow: none;
+}
+
+.prospect-card.publishing-card .intel-button,
+.prospect-card.publishing-card .story-button,
+.prospect-card.publishing-card .publish-button {
+  display: none !important;
+}
+
+.prospect-card.publishing-card .hockey-card-inner {
+  gap: 14px;
+}
+
+.prospect-card.publishing-card .hockey-card-details {
+  margin-top: 24px;
+}
+.prospector-publish-footer {
+  margin-top: 28px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.publish-footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.publish-footer-grid span {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+}
+
+.publish-footer-grid strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.95rem;
+}
+
+.publish-footer-grid small {
+  display: block;
+  margin-top: 4px;
+  opacity: 0.75;
+}
+
+.publish-qr-block {
+  text-align: center;
+}
+
+.publish-qr-block img {
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  background: white;
+  padding: 6px;
+}
+
+.prospector-brand-pill {
+  width: fit-content;
+  margin: 18px auto 0;
+  padding: 12px 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #06172f, #12345c);
+  color: white;
+  text-align: center;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
+}
+
+.prospector-brand-pill strong,
+.prospector-brand-pill span {
+  display: block;
+}
+
+.prospector-brand-pill span {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+}
