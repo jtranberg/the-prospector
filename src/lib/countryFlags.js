@@ -13,26 +13,27 @@ export function getCountryCode(nationality) {
     Finland: "FI",
     France: "FR",
     Slovakia: "SK",
+
     Bangladesh: "BD",
     Bermuda: "BM",
     Kenya: "KE",
     Monaco: "MC",
-
     Cuba: "CU",
-
     Ecuador: "EC",
     "Costa Rica": "CR",
     Namibia: "NA",
     Paraguay: "PY",
-
     Cambodia: "KH",
 
-    // UK / home nations
+    // UK / Home Nations
     England: "GB-ENG",
     Scotland: "GB-SCT",
     Wales: "GB-WLS",
     "Northern Ireland": "GB-NIR",
     "U.K.": "GB",
+    UK: "GB",
+    Britain: "GB",
+    "Great Britain": "GB",
 
     Norway: "NO",
     Italy: "IT",
@@ -79,7 +80,7 @@ export function getCountryCode(nationality) {
     Turkmenistan: "TM",
     Kyrgyzstan: "KG",
 
-    // Elite has this misspelled in your data.
+    // Elite has this misspelled
     Phillipines: "PH",
     Philippines: "PH",
 
@@ -105,7 +106,7 @@ export function getCountryCode(nationality) {
     Brazil: "BR",
     "Cayman Islands": "KY",
 
-    // Elite uses older/common hockey naming.
+    // Elite uses older/common hockey naming
     Macedonia: "MK",
 
     Moldova: "MD",
@@ -124,8 +125,7 @@ export function getCountryCode(nationality) {
     Peru: "PE",
     Venezuela: "VE",
 
-    // alternates
-    // Common alternate names
+    // Alternate names
     "Bosnia and Herzegovina": "BA",
     "Congo DR": "CD",
     "DR Congo": "CD",
@@ -133,8 +133,23 @@ export function getCountryCode(nationality) {
     "Korea, South": "KR",
     "Korea, North": "KP",
     "Czech Republic": "CZ",
-
     Taiwan: "TW",
+
+    // Future-proof additions
+    Nigeria: "NG",
+    Nepal: "NP",
+    "Sri Lanka": "LK",
+    Qatar: "QA",
+    Oman: "OM",
+    Jordan: "JO",
+    Iraq: "IQ",
+    Syria: "SY",
+    Palestine: "PS",
+    Malta: "MT",
+    Greenland: "GL",
+    "Faroe Islands": "FO",
+    Kosovo: "XK",
+    "Dominican Republic": "DO",
   };
 
   return countries[nationality?.trim()] || null;

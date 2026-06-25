@@ -1665,3 +1665,62 @@ td small {
 
   cursor: pointer;
 }
+.world-map-card {
+  overflow: hidden;
+}
+
+.world-map-wrap {
+  width: 100%;
+  overflow: hidden;
+  margin-top: 18px;
+}
+
+.world-map-wrap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.map-country {
+  transition: fill 0.18s ease, stroke 0.18s ease, opacity 0.18s ease;
+}
+
+.map-country.active {
+  cursor: pointer;
+}
+
+.map-country.active:hover {
+  fill: rgba(40, 255, 170, 1);
+  stroke: rgba(255, 255, 255, 0.75);
+}
+
+.map-hover-card {
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(255,255,255,0.16);
+  display: grid;
+  gap: 2px;
+  text-align: right;
+}
+
+.map-hover-card span {
+  color: rgba(255,255,255,0.72);
+  font-size: 0.85rem;
+}
+.map-hover-card {
+  min-width: 220px;
+  min-height: 58px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(255,255,255,0.16);
+  display: grid;
+  gap: 2px;
+  text-align: right;
+}
+
+.map-hover-card span {
+  color: rgba(255,255,255,0.72);
+  font-size: 0.85rem;
+}

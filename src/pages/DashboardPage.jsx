@@ -16,6 +16,8 @@ import {
   loadPositionStats,
 } from "../lib/liveProspects";
 
+import WorldProspectMap from "../components/WorldProspectMap";
+
 function getDatabaseMilestone(total) {
   if (!total) return "Building Dataset";
   if (total >= 100000) return "Global Pro Network";
@@ -499,6 +501,14 @@ function DashboardPage({ prospects = [] }) {
           <p>{decisionMessage}</p>
         </div>
 
+<WorldProspectMap
+    countries={nationalityStats}
+    onCountryClick={(country) => {
+        setSearchTerm(country);
+        handleSearch(1, country);
+    }}
+/>
+
         <div className="selected-stat-grid">
           <StatCard label="Players" value={playerCountDisplay} compact />
           <StatCard
@@ -523,6 +533,8 @@ function DashboardPage({ prospects = [] }) {
           />
         </div>
       </section>
+
+      
 
       <section className="dashboard-card scout-mission-card">
         <div className="section-header">
