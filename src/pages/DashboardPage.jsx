@@ -437,19 +437,12 @@ function DashboardPage({ prospects = [] }) {
       )}
 
       <section className="hero">
-        <p className="eyebrow">Global Hockey Intelligence</p>
-
-        <h1>
-          DAVE HALL'S <br />
-          Prospector Insights
-        </h1>
-
-        <p>
-          Turning a global prospect database into today’s shortlist: invite
-          targets, watch-list players, hidden gems, and profiles that need scout
-          intelligence.
-        </p>
-      </section>
+  <img
+    src="/prospectorHero.png"
+    alt="Dave Hall's Prospector - Global Hockey Intelligence"
+    className="hero-banner"
+  />
+</section>
 
       <section className="stats-grid">
         <StatCard label="Global Prospects" value={playerCountDisplay} />
