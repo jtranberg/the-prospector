@@ -198,8 +198,6 @@ async function syncElitePage({ limit, offset }) {
   };
 }
 
-
-
 // GET /api/prospects/stats
 // Dashboard database totals.
 // IMPORTANT: This must stay above router.get("/:eliteId").
@@ -536,7 +534,6 @@ router.post("/sync-range", async (req, res) => {
   }
 });
 
-
 // Shared Mongo prospect search/list handler.
 // Used by both:
 // GET /api/prospects
@@ -555,30 +552,30 @@ async function searchProspects(req, res) {
 
     const filter = {};
 
-   if (q && String(q).trim()) {
-  const cleanQ = String(q).trim();
-  const normalizedQ = cleanQ.replace(/[-_]+/g, " ");
-  const searchRegex = { $regex: normalizedQ, $options: "i" };
-  const numericQ = Number(cleanQ);
+    if (q && String(q).trim()) {
+      const cleanQ = String(q).trim();
+      const normalizedQ = cleanQ.replace(/[-_]+/g, " ");
+      const searchRegex = { $regex: normalizedQ, $options: "i" };
+      const numericQ = Number(cleanQ);
 
-  filter.$or = [
-    // Exact Elite ID search.
-    { eliteId: cleanQ },
+      filter.$or = [
+        // Exact Elite ID search.
+        { eliteId: cleanQ },
 
-    // Numeric app/Elite ID search.
-    ...(Number.isNaN(numericQ) ? [] : [{ id: numericQ }]),
+        // Numeric app/Elite ID search.
+        ...(Number.isNaN(numericQ) ? [] : [{ id: numericQ }]),
 
-    // Text search.
-    { name: searchRegex },
-    { nationality: searchRegex },
-    { secondaryNationality: searchRegex },
-    { team: searchRegex },
-    { position: searchRegex },
-    { league: searchRegex },
-    { teamCountry: searchRegex },
-    { placeOfBirth: searchRegex },
-  ];
-}
+        // Text search.
+        { name: searchRegex },
+        { nationality: searchRegex },
+        { secondaryNationality: searchRegex },
+        { team: searchRegex },
+        { position: searchRegex },
+        { league: searchRegex },
+        { teamCountry: searchRegex },
+        { placeOfBirth: searchRegex },
+      ];
+    }
 
     if (league) filter.league = { $regex: league, $options: "i" };
     if (team) filter.team = { $regex: team, $options: "i" };
@@ -622,11 +619,7 @@ async function searchProspects(req, res) {
     }
 
     const [players, total] = await Promise.all([
-      Prospect.find(filter)
-        .sort(sortOption)
-        .skip(skip)
-        .limit(safeLimit)
-        .lean(),
+      Prospect.find(filter).sort(sortOption).skip(skip).limit(safeLimit).lean(),
       Prospect.countDocuments(filter),
     ]);
 
@@ -654,8 +647,6 @@ async function searchProspects(req, res) {
 // Keep these ABOVE router.get("/:eliteId")
 router.get("/", searchProspects);
 router.get("/search", searchProspects);
-
-
 
 // GET /api/prospects/live
 // Live Elite list. Costs Elite API calls unless cached.
@@ -860,8 +851,6 @@ router.get("/live/:id", async (req, res) => {
   }
 });
 
-
-
 // GET /api/prospects/probe
 // Debug helper for testing Elite API responses.
 router.get("/probe", async (req, res) => {
@@ -990,15 +979,99 @@ router.get("/image/:eliteId", async (req, res) => {
     );
 
     // Browser cache for one hour
-    res.setHeader(
-      "Cache-Control",
-      "public,max-age=3600"
-    );
+    res.setHeader("Cache-Control", "public,max-age=3600");
 
     response.body.pipe(res);
   } catch (err) {
     console.error(err);
     res.status(500).end();
+  }
+});
+
+// GET /api/prospects/pipeline-summary
+router.get("/pipeline-summary", async (req, res) => {
+  try {
+    const prospects = await Prospect.find(
+      {},
+      {
+        games: 1,
+        goals: 1,
+        assists: 1,
+        points: 1,
+        ppg: 1,
+        age: 1,
+        enriched: 1,
+        imageUrl: 1,
+        height: 1,
+        heightImperial: 1,
+        weight: 1,
+        weightImperial: 1,
+        shoots: 1,
+        dateOfBirth: 1,
+        yearOfBirth: 1,
+      },
+    ).lean();
+
+   function scorePlayer(player) {
+  let score = 0;
+
+  const ppg = Number(player.ppg) || 0;
+  const games = Number(player.games) || 0;
+  const points = Number(player.points) || 0;
+
+  if (ppg >= 2) score += 50;
+  else if (ppg >= 1.5) score += 42;
+  else if (ppg >= 1) score += 34;
+  else if (ppg >= 0.5) score += 20;
+
+  if (points >= 50) score += 30;
+  else if (points >= 25) score += 22;
+  else if (points >= 10) score += 14;
+
+  if (games >= 20) score += 20;
+  else if (games >= 10) score += 12;
+  else if (games > 0) score += 6;
+
+  return Math.min(score, 100);
+}
+
+    const summary = {
+      totalScored: prospects.length,
+      inviteNow: 0,
+      watchClosely: 0,
+      needsData: 0,
+      hiddenGems: 0,
+    };
+
+    prospects.forEach((player) => {
+      const score = scorePlayer(player);
+      const ppg = Number(player.ppg) || 0;
+
+      if (score >= 70) {
+        summary.inviteNow += 1;
+      } else if (score >= 45) {
+        summary.watchClosely += 1;
+      } else {
+        summary.needsData += 1;
+      }
+
+      if (ppg >= 1 && score >= 70) {
+        summary.hiddenGems += 1;
+      }
+    });
+
+    res.json({
+      success: true,
+      source: "mongo",
+      ...summary,
+    });
+  } catch (error) {
+    console.error("Pipeline summary error:", error.message);
+
+    res.status(500).json({
+      error: "Pipeline summary failed",
+      message: error.message,
+    });
   }
 });
 
@@ -1023,6 +1096,5 @@ router.get("/:eliteId", async (req, res) => {
     });
   }
 });
-
 
 export default router;

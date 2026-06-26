@@ -7,6 +7,10 @@ import ProspectCharts from "../components/ProspectCharts";
 
 import { getProspectScore, getPPG } from "../lib/prospectScoring";
 import { getScoutXP, getScoutLevel } from "../lib/gamification";
+
+import WorldProspectMap from "../components/WorldProspectMap";
+import { publishPlayerCard } from "../lib/publisher";
+
 import {
   loadProspectById,
   searchProspects,
@@ -14,10 +18,8 @@ import {
   loadProspectStats,
   loadNationalityStats,
   loadPositionStats,
+  loadPipelineSummary, // <-- add this
 } from "../lib/liveProspects";
-
-import WorldProspectMap from "../components/WorldProspectMap";
-import { publishPlayerCard } from "../lib/publisher";
 
 function getDatabaseMilestone(total) {
   if (!total) return "Building Dataset";
@@ -58,6 +60,8 @@ function DashboardPage({ prospects = [] }) {
   const [searchError, setSearchError] = useState("");
 
   const [enrichLoading, setEnrichLoading] = useState(false);
+
+  const [pipelineSummary, setPipelineSummary] = useState(null);
 
   const [showGreeting, setShowGreeting] = useState(() => {
     return localStorage.getItem("scoutboard-welcome-dismissed") !== "true";
@@ -209,6 +213,9 @@ function DashboardPage({ prospects = [] }) {
 
         const stats = await loadProspectStats();
         setDbStats(stats);
+
+        const pipeline = await loadPipelineSummary();
+        setPipelineSummary(pipeline); // <-- THIS is missing
       } catch (error) {
         console.error("Unable to load DB stats:", error);
         setStatsError(true);
@@ -438,12 +445,12 @@ function DashboardPage({ prospects = [] }) {
       )}
 
       <section className="hero">
-  <img
-    src="/prospectorHero.png"
-    alt="Dave Hall's Prospector - Global Hockey Intelligence"
-    className="hero-banner"
-  />
-</section>
+        <img
+          src="/prospectorHero.png"
+          alt="Dave Hall's Prospector - Global Hockey Intelligence"
+          className="hero-banner"
+        />
+      </section>
 
       <section className="stats-grid">
         <StatCard label="Global Prospects" value={playerCountDisplay} />
@@ -495,13 +502,13 @@ function DashboardPage({ prospects = [] }) {
           <p>{decisionMessage}</p>
         </div>
 
-<WorldProspectMap
-    countries={nationalityStats}
-    onCountryClick={(country) => {
-        setSearchTerm(country);
-        handleSearch(1, country);
-    }}
-/>
+        <WorldProspectMap
+          countries={nationalityStats}
+          onCountryClick={(country) => {
+            setSearchTerm(country);
+            handleSearch(1, country);
+          }}
+        />
 
         <div className="selected-stat-grid">
           <StatCard label="Players" value={playerCountDisplay} compact />
@@ -527,8 +534,6 @@ function DashboardPage({ prospects = [] }) {
           />
         </div>
       </section>
-
-      
 
       <section className="dashboard-card scout-mission-card">
         <div className="section-header">
@@ -564,14 +569,14 @@ function DashboardPage({ prospects = [] }) {
 
             <div className="rink-zone">
               <span>Watch Closely</span>
-              <strong>{intelligence.watchClosely.length}</strong>
-              <small>Loaded review set</small>
+              <strong>{pipelineSummary?.watchClosely ?? "Loading..."}</strong>
+              <small>DB score 45–69</small>
             </div>
 
             <div className="rink-zone hot-zone">
               <span>Invite Now</span>
-              <strong>{intelligence.inviteNow.length}</strong>
-              <small>Action signals</small>
+              <strong>{pipelineSummary?.inviteNow ?? "Loading..."}</strong>
+              <small>DB score 70+</small>
             </div>
           </div>
         </section>
@@ -602,17 +607,17 @@ function DashboardPage({ prospects = [] }) {
               lineHeight: "1.2",
             }}
           />
-
+          {/* <StatCard
+            label="Watch Closely"
+            value={pipelineSummary?.watchClosely ?? "Loading..."}
+            compact
+          />
           <StatCard
             label="Invite Now"
-            value={intelligence.inviteNow.length}
+            value={pipelineSummary?.inviteNow ?? "Loading..."}
             compact
-          />
-          <StatCard
-            label="Watch Closely"
-            value={intelligence.watchClosely.length}
-            compact
-          />
+          /> */}
+
           <StatCard
             label="Needs Data"
             value={intelligence.needsData.length}
@@ -778,37 +783,37 @@ function DashboardPage({ prospects = [] }) {
 
         {/* Only show the selector when there is more than one result */}
         {selectableProspects.length > 1 && (
-  <select
-    className="scout-input"
-    value={selectedPlayerId}
-    onChange={async (event) => {
-      const playerId = event.target.value;
+          <select
+            className="scout-input"
+            value={selectedPlayerId}
+            onChange={async (event) => {
+              const playerId = event.target.value;
 
-      setSelectedPlayerId(playerId);
-      setSelectedPlayerDetail(null);
+              setSelectedPlayerId(playerId);
+              setSelectedPlayerDetail(null);
 
-      if (!playerId) return;
+              if (!playerId) return;
 
-      const detail = await loadProspectById(playerId);
-      setSelectedPlayerDetail(detail);
-    }}
-  >
-    <option value="">Choose a prospect...</option>
+              const detail = await loadProspectById(playerId);
+              setSelectedPlayerDetail(detail);
+            }}
+          >
+            <option value="">Choose a prospect...</option>
 
-    {selectableProspects.map((player) => {
-      const playerId = player.eliteId || player.id;
-      const score = getProspectScore(player);
+            {selectableProspects.map((player) => {
+              const playerId = player.eliteId || player.id;
+              const score = getProspectScore(player);
 
-      return (
-        <option key={playerId} value={String(playerId)}>
-          #{playerId} — {player.name || "Unknown Player"} — Score {score} —{" "}
-          {player.nationality || "Nationality unavailable"} —{" "}
-          {player.position || "N/A"}
-        </option>
-      );
-    })}
-  </select>
-)}
+              return (
+                <option key={playerId} value={String(playerId)}>
+                  #{playerId} — {player.name || "Unknown Player"} — Score{" "}
+                  {score} — {player.nationality || "Nationality unavailable"} —{" "}
+                  {player.position || "N/A"}
+                </option>
+              );
+            })}
+          </select>
+        )}
       </section>
 
       {detailLoading && (
@@ -831,41 +836,39 @@ function DashboardPage({ prospects = [] }) {
             </div>
 
             <div className="hockey-card-actions">
+              <button
+                className="button-link"
+                type="button"
+                onClick={handleEnrich}
+                disabled={enrichLoading}
+              >
+                {enrichLoading ? "Enriching..." : "Enrich Player"}
+              </button>
 
-  <button
-    className="button-link"
-    type="button"
-    onClick={handleEnrich}
-    disabled={enrichLoading}
-  >
-    {enrichLoading ? "Enriching..." : "Enrich Player"}
-  </button>
+              <button
+                className="button-link publish-button"
+                type="button"
+                onClick={() =>
+                  publishPlayerCard(displayPlayer, {
+                    totalProspects: dbStats?.total ?? "226,000+",
+                    countries: dbStats?.countries ?? "108",
+                  })
+                }
+              >
+                Publish Card
+              </button>
 
-<button
-  className="button-link publish-button"
-  type="button"
-  onClick={() =>
-    publishPlayerCard(displayPlayer, {
-      totalProspects: dbStats?.total ?? "226,000+",
-      countries: dbStats?.countries ?? "108",
-    })
-  }
->
-  Publish Card
-</button>
-
-  {displayPlayer.eliteUrl && (
-    <a
-      href={displayPlayer.eliteUrl}
-      target="_blank"
-      rel="noreferrer"
-      className="button-link"
-    >
-      Elite Profile
-    </a>
-  )}
-
-</div>
+              {displayPlayer.eliteUrl && (
+                <a
+                  href={displayPlayer.eliteUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="button-link"
+                >
+                  Elite Profile
+                </a>
+              )}
+            </div>
           </div>
 
           <div className="hockey-card-frame">

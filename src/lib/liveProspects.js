@@ -186,3 +186,29 @@ export async function loadPositionStats() {
 
   return data.positions || [];
 }
+
+export async function loadPipelineSummary() {
+  const url = `${API_BASE}/api/prospects/pipeline-summary`;
+
+  console.log("LOADING PIPELINE SUMMARY FROM:", url);
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    const text = await response.text();
+
+    console.error("PIPELINE SUMMARY REQUEST FAILED:", {
+      url,
+      status: response.status,
+      body: text,
+    });
+
+    throw new Error("Pipeline summary unavailable");
+  }
+
+  const data = await response.json();
+
+  console.log("PIPELINE SUMMARY RESPONSE:", data);
+
+  return data;
+}
