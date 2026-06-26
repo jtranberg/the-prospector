@@ -4,10 +4,20 @@ import "./App.css";
 
 import DashboardPage from "./pages/DashboardPage";
 import ProspectsPage from "./pages/ProspectsPage";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
-import TermsOfServicePage from "./pages/TermsOfServicePage";
 import CookiePolicyPage from "./pages/CookiePolicyPage";
 import ContactPage from "./pages/ContactPage";
+
+import TrustCenterPage from "./pages/legal/TrustCenterPage";
+import PrivacyPolicyPage from "./pages/legal/PrivacyPolicyPage";
+import SecurityPage from "./pages/legal/SecurityPage";
+import ResponsibleAIPage from "./pages/legal/ResponsibleAIPage";
+import DataSourcesPage from "./pages/legal/DataSourcesPage";
+import CompliancePage from "./pages/legal/CompliancePage";
+import AboutPage from "./pages/legal/AboutPage";
+import TermsOfServicePage from "./pages/legal/TermsOfServicePage";
+import ReleaseNotesPage from "./pages/legal/ReleaseNotesPage";
+import AccessibilityPage from "./pages/legal/AccessibilityPage";
+import SystemArchitecturePage from "./pages/legal/SystemArchitecturePage";
 
 import { loadCsvProspects } from "./lib/prospectMapper";
 import { loadProspects } from "./lib/liveProspects";
@@ -56,36 +66,20 @@ function App() {
         </div>
 
         <div className={`nav-links ${mobileMenuOpen ? "open" : ""}`}>
-          <Link
-            to="/"
-            className="nav-pill"
-            onClick={() => setMobileMenuOpen(false)}
-          >
+          <Link to="/" className="nav-pill" onClick={() => setMobileMenuOpen(false)}>
             Dashboard
           </Link>
 
-          <Link
-            to="/prospects"
-            className="nav-pill"
-            onClick={() => setMobileMenuOpen(false)}
-          >
+          <Link to="/prospects" className="nav-pill" onClick={() => setMobileMenuOpen(false)}>
             Prospect Database
           </Link>
 
-          <Link
-            to="/privacy"
-            className="nav-pill"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Privacy
+          <Link to="/trust" className="nav-pill" onClick={() => setMobileMenuOpen(false)}>
+            Trust Center
           </Link>
 
-          <Link
-            to="/terms"
-            className="nav-pill"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Terms
+          <Link to="/contact" className="nav-pill" onClick={() => setMobileMenuOpen(false)}>
+            Contact
           </Link>
 
           <a
@@ -101,20 +95,21 @@ function App() {
       </nav>
 
       <Routes>
-        <Route
-          path="/"
-          element={<DashboardPage prospects={rankedProspects} />}
-        />
-
-        <Route
-          path="/prospects"
-          element={<ProspectsPage prospects={rankedProspects} />}
-        />
-
+        <Route path="/" element={<DashboardPage prospects={rankedProspects} />} />
+        <Route path="/prospects" element={<ProspectsPage prospects={rankedProspects} />} />
+        <Route path="/trust" element={<TrustCenterPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/cookies" element={<CookiePolicyPage />} />
-  <Route path="/contact" element={<ContactPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/security" element={<SecurityPage />} />
+        <Route path="/responsible-ai" element={<ResponsibleAIPage />} />
+        <Route path="/data-sources" element={<DataSourcesPage />} />
+        <Route path="/compliance" element={<CompliancePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/release-notes" element={<ReleaseNotesPage />} />
+        <Route path="/accessibility" element={<AccessibilityPage />} />
+        <Route path="/system-architecture" element={<SystemArchitecturePage />} />
       </Routes>
     </>
   );

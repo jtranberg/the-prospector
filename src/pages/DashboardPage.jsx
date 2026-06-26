@@ -893,13 +893,23 @@ function DashboardPage({ prospects = [] }) {
         </div>
 
         <div className="footer-links">
+          <Link to="/about">About</Link>
+          <Link to="/trust">Trust Center</Link>
           <Link to="/privacy">Privacy Policy</Link>
-          <Link to="/terms">Terms of Service</Link>
+          <Link to="/security">Security</Link>
+          <Link to="/responsible-ai">Responsible AI</Link>
+          <Link to="/data-sources">Data Sources</Link>
+          <Link to="/compliance">Compliance</Link>
+          <Link to="/accessibility">Accessibility</Link>
+          <Link to="/terms">Terms</Link>
+          <Link to="/release-notes">Release Notes</Link>
           <Link to="/cookies">Cookie Policy</Link>
           <Link to="/contact">Contact</Link>
         </div>
 
-        <div className="footer-copy">© 2026 App Intelligence</div>
+        <div className="footer-copy">
+          Dave Hall's Prospector Version 1.0 © 2026 App Intelligence
+        </div>
       </footer>
     </main>
   );
