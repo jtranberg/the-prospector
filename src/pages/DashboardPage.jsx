@@ -522,11 +522,11 @@ function DashboardPage({ prospects = [] }) {
             value={statsError ? "Unavailable" : dbEnriched}
             compact
           />
-          <StatCard
+          {/* <StatCard
             label="DB Coverage"
             value={`${dbCoveragePercent}%`}
             compact
-          />
+          /> */}
           <StatCard
             label="Duplicates"
             value={statsError ? "Unavailable" : dbDuplicates}
