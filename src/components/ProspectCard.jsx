@@ -360,30 +360,32 @@ function ProspectCard({ player, getProspectScore }) {
           {getPositionLabel(player.position)}
         </div>
 
-        <div className="hockey-card-photo">
-          {activePlayer.imageUrl?.length > 0 ? (
-            <img
-              src={activePlayer.imageUrl}
-              alt={activePlayer.name || "Player"}
-            />
-          ) : (
-            <div className="hockey-card-placeholder">🏒</div>
-          )}
+       <div className="hockey-card-photo">
+  {activePlayer.imageUrl?.length > 0 ? (
+    <img
+      src={activePlayer.imageUrl}
+      alt={activePlayer.name || "Player"}
+    />
+  ) : (
+    <div className="hockey-card-placeholder">🏒</div>
+  )}
+</div>
 
-          <div className={`hockey-card-score ${getScoreClass(score)}`}>
-            <span>Score</span>
-            <strong>{score}</strong>
-          </div>
-        </div>
+<div className="hockey-card-nameplate">
+  <h3>{activePlayer.name || "Unknown Player"}</h3>
 
-        <div className="hockey-card-nameplate">
-          <p>{activePlayer.league || "Unknown League"}</p>
-          <h3>{activePlayer.name || "Unknown Player"}</h3>
-          <span>
-            {activePlayer.team || "Unknown Team"} •{" "}
-            {activePlayer.position || "N/A"}
-          </span>
-        </div>
+  <span>
+    {activePlayer.team || "Unknown Team"} •{" "}
+    {activePlayer.position || "N/A"}
+  </span>
+
+  <p>{activePlayer.league || "Unknown League"}</p>
+</div>
+
+<div className={`hockey-card-score ${getScoreClass(score)}`}>
+  <span>Draft Signal</span>
+  <strong>{score}</strong>
+</div>
 
         <div className="hockey-card-meta">
           <span>
@@ -432,7 +434,7 @@ function ProspectCard({ player, getProspectScore }) {
         <div className="hockey-card-badges">
           <span>{intelBadge}</span>
           <span>{decision}</span>
-          <span>{activePlayer.enriched ? "Verified File" : "Basic File"}</span>
+          <span>{activePlayer.enriched ? "Verified Intel" : "Basic File"}</span>
         </div>
 
         <div className="scout-note hockey-card-note">
@@ -744,7 +746,7 @@ function ProspectCard({ player, getProspectScore }) {
 
             <strong>Intel Quality</strong>
             <small>
-              {activePlayer.enriched ? "Verified file" : "Needs enrich"}
+              {activePlayer.enriched ? "Verified Intel" : "Needs enrich"}
             </small>
           </div>
 

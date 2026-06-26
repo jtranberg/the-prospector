@@ -1838,3 +1838,137 @@ td small {
   letter-spacing: 0.08em;
   opacity: 0.8;
 }
+
+.publishing-card .hockey-card-photo {
+  margin-top:8px;
+  width: 160px;
+  height: auto;
+  margin: 14px auto 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+}
+
+.publishing-card .hockey-card-photo img {
+  width: 160px;
+  height: 220px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 18px;
+  display: block;
+   border:2px solid rgba(255,255,255,.18);
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+}
+
+.publishing-card .hockey-card-score {
+  margin-top: 18px;
+  font-size:5rem;
+}
+
+.publishing-card .publish-photo-credit {
+  margin-top: 8px;
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+.publish-photo-credit {
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  opacity: 0.45;
+  margin-top: 6px;
+  text-transform: uppercase;
+}
+
+.publish-report-id {
+  white-space: nowrap;
+}
+
+.publish-version-line {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  opacity: 0.55;
+}
+
+.hockey-card-nameplate h2{
+    font-size:2rem;
+    font-weight:800;
+    margin:10px 0 4px;
+}
+
+.player-team{
+    font-size:1.1rem;
+    opacity:.95;
+}
+
+.player-league{
+    font-size:.95rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    opacity:.7;
+    margin-top:4px;
+}
+.app-intelligence-badge{
+    margin:16px auto 8px;
+    width:max-content;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+
+    padding:10px 40px;
+
+    border-radius:999px;
+
+    background:linear-gradient(
+        180deg,
+        #0e3165,
+        #061c40
+    );
+
+    border:1px solid rgba(255,255,255,.12);
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,.30),
+        inset 0 1px 0 rgba(255,255,255,.10);
+}
+
+.app-intelligence-badge .badge-label{
+    font-size:.62rem;
+    text-transform:uppercase;
+    letter-spacing:.16em;
+    color:#a8c7ff;
+}
+
+.app-intelligence-badge strong{
+    margin-top:2px;
+    font-size:1rem;
+    letter-spacing:.08em;
+    color:#fff;
+}
+
+.app-intelligence-badge small{
+    margin-top:3px;
+    color:#c9dcff;
+    font-size:.72rem;
+    letter-spacing:.05em;
+}
+
+.publish-version-line{
+    display:block;
+    margin-top:8px;
+    text-align:center;
+    font-size:.68rem;
+    color:rgba(255,255,255,.45);
+}
+
+.app-intelligence-badge {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}

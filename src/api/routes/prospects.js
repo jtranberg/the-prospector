@@ -860,6 +860,8 @@ router.get("/live/:id", async (req, res) => {
   }
 });
 
+
+
 // GET /api/prospects/probe
 // Debug helper for testing Elite API responses.
 router.get("/probe", async (req, res) => {
@@ -955,6 +957,48 @@ router.patch("/:eliteId/manual", async (req, res) => {
       error: "Manual update failed",
       message: error.message,
     });
+  }
+});
+
+// GET /api/prospects/image/:eliteId
+// Proxies Elite player photos through our server.
+// This removes browser CORS issues and lets publisher include photos.
+router.get("/image/:eliteId", async (req, res) => {
+  try {
+    const { eliteId } = req.params;
+
+    // Find cached Mongo record first.
+    const player = await Prospect.findOne({
+      eliteId: String(eliteId),
+    }).lean();
+
+    if (!player?.imageUrl) {
+      return res.status(404).json({
+        error: "No player image available",
+      });
+    }
+
+    const response = await fetch(player.imageUrl);
+
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
+
+    res.setHeader(
+      "Content-Type",
+      response.headers.get("content-type") || "image/jpeg",
+    );
+
+    // Browser cache for one hour
+    res.setHeader(
+      "Cache-Control",
+      "public,max-age=3600"
+    );
+
+    response.body.pipe(res);
+  } catch (err) {
+    console.error(err);
+    res.status(500).end();
   }
 });
 

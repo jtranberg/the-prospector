@@ -841,13 +841,18 @@ function DashboardPage({ prospects = [] }) {
     {enrichLoading ? "Enriching..." : "Enrich Player"}
   </button>
 
-  <button
-    className="button-link publish-button"
-    type="button"
-    onClick={() => publishPlayerCard(displayPlayer.name)}
-  >
-    Publish Card
-  </button>
+<button
+  className="button-link publish-button"
+  type="button"
+  onClick={() =>
+    publishPlayerCard(displayPlayer, {
+      totalProspects: dbStats?.total ?? "226,000+",
+      countries: dbStats?.countries ?? "108",
+    })
+  }
+>
+  Publish Card
+</button>
 
   {displayPlayer.eliteUrl && (
     <a
