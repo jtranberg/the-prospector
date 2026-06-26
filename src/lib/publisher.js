@@ -1,3 +1,9 @@
+import { API_BASE_URL } from "../lib/apiConfig";
+
+function getPublishImageUrl(playerId) {
+  return `${API_BASE_URL}/api/prospects/image/${playerId}`;
+}
+
 export async function publishPlayerCard(
   player,
   {
@@ -22,7 +28,6 @@ export async function publishPlayerCard(
     .replace(/(^-|-$)/g, "");
 
   const publishedAt = new Date();
-
   const publishedDate = publishedAt.toLocaleDateString("en-CA");
 
   const publishedDateDisplay = publishedAt.toLocaleDateString("en-CA", {
@@ -70,7 +75,6 @@ export async function publishPlayerCard(
 
   let publishFooter = null;
   let photoCredit = null;
-  
   let playerImage = null;
   let originalImageSrc = null;
 
@@ -92,9 +96,7 @@ export async function publishPlayerCard(
       : "Player photo unavailable";
 
     const photoBlock = card.querySelector(".hockey-card-photo");
-    if (photoBlock) {
-      photoBlock.appendChild(photoCredit);
-    }
+    if (photoBlock) photoBlock.appendChild(photoCredit);
 
     publishFooter = document.createElement("div");
     publishFooter.className = "prospector-publish-footer";
@@ -133,31 +135,27 @@ export async function publishPlayerCard(
 
     card.appendChild(publishFooter);
 
-   const aiBadge = document.createElement("div");
+    const aiBadge = document.createElement("a");
+    aiBadge.className = "app-intelligence-badge";
+    aiBadge.href = "https://appintelligence.ca";
+    aiBadge.target = "_blank";
+    aiBadge.rel = "noopener noreferrer";
+    aiBadge.innerHTML = `
+      <span class="badge-label">Powered by</span>
+      <strong>APP INTELLIGENCE.CA</strong>
+    `;
+    publishFooter.appendChild(aiBadge);
 
-aiBadge.className = "app-intelligence-badge";
-
-aiBadge.innerHTML = `
-  <span class="badge-label">Powered by</span>
-  <strong>APP INTELLIGENCE.CA</strong>`;
-
-publishFooter.appendChild(aiBadge);
-
-const versionLine = document.createElement("small");
-
-versionLine.className = "publish-version-line";
-versionLine.textContent =
-  "Scout Report v1.0 • © 2026 App Intelligence";
-
-publishFooter.appendChild(versionLine);
-
-
+    const versionLine = document.createElement("small");
+    versionLine.className = "publish-version-line";
+    versionLine.textContent = "Scout Report v1.0 • © 2026 App Intelligence";
+    publishFooter.appendChild(versionLine);
 
     playerImage = card.querySelector(".hockey-card-photo img");
     originalImageSrc = playerImage?.src || null;
 
     if (playerImage && playerId) {
-      playerImage.src = `http://localhost:5050/api/prospects/image/${playerId}`;
+      playerImage.src = getPublishImageUrl(playerId);
 
       await new Promise((resolve) => {
         playerImage.onload = resolve;
@@ -180,12 +178,9 @@ publishFooter.appendChild(versionLine);
         overflow: "visible",
       },
       filter: (node) => {
-        if (node instanceof HTMLImageElement && !node.complete) {
-          return false;
-        }
+        if (node instanceof HTMLImageElement && !node.complete) return false;
 
         const classList = node.classList;
-
         if (!classList) return true;
 
         return !(
@@ -205,10 +200,7 @@ publishFooter.appendChild(versionLine);
   } catch (error) {
     console.error("Unable to publish player card:", error);
   } finally {
-    if (playerImage && originalImageSrc) {
-      playerImage.src = originalImageSrc;
-    }
-
+    if (playerImage && originalImageSrc) playerImage.src = originalImageSrc;
     if (photoCredit) photoCredit.remove();
     if (publishFooter) publishFooter.remove();
     card.classList.remove("publishing-card");

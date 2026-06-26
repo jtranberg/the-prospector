@@ -813,7 +813,7 @@ function DashboardPage({ prospects = [] }) {
 
       {detailLoading && (
         <section className="dashboard-card">
-          <p>Loading Mongo player detail...</p>
+          <p>Loading Dave's player detail...</p>
         </section>
       )}
 
