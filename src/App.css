@@ -1972,3 +1972,8 @@ td small {
   color: inherit;
   cursor: pointer;
 }
+.app-intelligence-badge {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
