@@ -21,7 +21,9 @@
 ![Architecture](https://img.shields.io/badge/Architecture-Layered-555?style=flat-square)
 ![Documentation](https://img.shields.io/badge/Docs-15%20Professional%20Guides-informational?style=flat-square)
 
-
+<p align="center">
+  <img src="public/prospectorHero.png" alt="Dave Hall's Prospector Hero" width="100%">
+</p>
 
 ## Global Hockey Intelligence Platform
 
