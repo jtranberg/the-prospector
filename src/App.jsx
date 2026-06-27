@@ -19,15 +19,24 @@ import ReleaseNotesPage from "./pages/legal/ReleaseNotesPage";
 import AccessibilityPage from "./pages/legal/AccessibilityPage";
 import SystemArchitecturePage from "./pages/legal/SystemArchitecturePage";
 
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+import ChangePasswordPage from "./pages/auth/ChangePasswordPage";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import CookieConsentBanner from "./components/common/CookieConsentBanner";
+
 import { loadCsvProspects } from "./lib/prospectMapper";
 import { loadProspects } from "./lib/liveProspects";
 import { getProspectScore } from "./lib/prospectScoring";
+import { useAuth } from "./hooks/useAuth";
 
 const csvProspects = loadCsvProspects();
 
 function App() {
   const [prospects, setProspects] = useState(csvProspects);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, logout, isAuthenticated } = useAuth();
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
   useEffect(() => {
     async function loadMongoProspects() {
@@ -53,7 +62,7 @@ function App() {
     <>
       <nav className="top-nav">
         <div className="mobile-nav-header">
-          <strong>The Prospector</strong>
+          <strong>Dave Hall&apos;s Prospector</strong>
 
           <button
             className="hamburger-button"
@@ -64,39 +73,144 @@ function App() {
             ☰
           </button>
         </div>
-
         <div className={`nav-links ${mobileMenuOpen ? "open" : ""}`}>
-          <Link to="/" className="nav-pill" onClick={() => setMobileMenuOpen(false)}>
+          <Link
+            to="/"
+            className="nav-pill"
+            onClick={() => setMobileMenuOpen(false)}
+          >
             Dashboard
           </Link>
 
-          <Link to="/prospects" className="nav-pill" onClick={() => setMobileMenuOpen(false)}>
+          <Link
+            to="/prospects"
+            className="nav-pill"
+            onClick={() => setMobileMenuOpen(false)}
+          >
             Prospect Database
           </Link>
 
-          <Link to="/trust" className="nav-pill" onClick={() => setMobileMenuOpen(false)}>
+          <Link
+            to="/trust"
+            className="nav-pill"
+            onClick={() => setMobileMenuOpen(false)}
+          >
             Trust Center
           </Link>
 
-          <Link to="/contact" className="nav-pill" onClick={() => setMobileMenuOpen(false)}>
-            Contact
-          </Link>
-
-          <a
-            href="https://appintelligence.ca"
-            target="_blank"
-            rel="noreferrer"
-            className="ai-badge nav-ai-badge"
+          <Link
+            to="/contact"
+            className="nav-pill"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Powered by App Intelligence
-          </a>
+            Contact
+          </Link>
         </div>
+        <div className="nav-auth">
+          {isAuthenticated ? (
+            <>
+              <div className="account-menu">
+                <button
+                  className="account-button"
+                  type="button"
+                  onClick={() => setAccountMenuOpen((open) => !open)}
+                  aria-expanded={accountMenuOpen}
+                >
+                  {user?.name || "Scout"} ▾
+                </button>
+
+                {accountMenuOpen && (
+                  <div className="account-dropdown">
+                    <div className="account-summary">
+                      <strong>{user?.name || "Scout"}</strong>
+                      <span>{user?.role || "SCOUT"}</span>
+                      <small>Secure Scout Session</small>
+                    </div>
+
+                    <Link
+                      to="/change-password"
+                      onClick={() => {
+                        setAccountMenuOpen(false);
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Change Password
+                    </Link>
+                    <span className="session-badge">Secure Session</span>
+                    <Link
+                      to="/trust"
+                      onClick={() => {
+                        setAccountMenuOpen(false);
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Trust Center
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        setAccountMenuOpen(false);
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="nav-pill"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Login
+              </Link>
+
+              <Link
+                to="/register"
+                className="nav-pill"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Register
+              </Link>
+            </>
+          )}
+        </div>{" "}
+        <a
+          href="https://appintelligence.ca"
+          target="_blank"
+          rel="noreferrer"
+          className="ai-badge nav-ai-badge"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          Powered by App Intelligence.ca
+        </a>
       </nav>
 
       <Routes>
-        <Route path="/" element={<DashboardPage prospects={rankedProspects} />} />
-        <Route path="/prospects" element={<ProspectsPage prospects={rankedProspects} />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <DashboardPage prospects={rankedProspects} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/prospects"
+          element={
+            <ProtectedRoute>
+              <ProspectsPage prospects={rankedProspects} />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="/trust" element={<TrustCenterPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/terms" element={<TermsOfServicePage />} />
@@ -109,8 +223,24 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/release-notes" element={<ReleaseNotesPage />} />
         <Route path="/accessibility" element={<AccessibilityPage />} />
-        <Route path="/system-architecture" element={<SystemArchitecturePage />} />
+        <Route
+          path="/system-architecture"
+          element={<SystemArchitecturePage />}
+        />
+
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <ChangePasswordPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
+      <CookieConsentBanner />
     </>
   );
 }

@@ -5,18 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-   "api": "node --max-old-space-size=2048 src/api/server.js",
+    "api": "node --max-old-space-size=2048 src/api/server.js",
     "start": "node src/api/server.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "d3-geo": "^3.1.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "html-to-image": "^1.11.13",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.16.0",
     "mongoose": "^9.7.0",
     "node-fetch": "^3.3.2",

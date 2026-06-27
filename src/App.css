@@ -84,14 +84,12 @@ body {
   box-shadow: 0 20px 70px rgba(0, 0, 0, 0.28);
 }
 
-.dashboard-card .stat-card 
-{
+.dashboard-card .stat-card {
   width: 50%;
   margin: auto;
   padding: 5px;
   margin-bottom: 10px;
 }
-
 
 .stat-card {
   padding: 4px;
@@ -107,8 +105,6 @@ body {
 .stat-card strong {
   font-size: 2.4rem;
 }
-
-
 
 /* PROSPECT CARDS */
 
@@ -170,7 +166,6 @@ body {
   padding: 10px;
   border-radius: 18px;
   margin-bottom: 10px;
-  
 }
 
 .prospect-score.score-low {
@@ -218,7 +213,6 @@ body {
   font-size: 4rem;
   line-height: 1;
   font-weight: 700;
-  
 }
 
 .prospect-score span {
@@ -256,7 +250,6 @@ body {
 
 .prospect-stats strong {
   font-size: 1rem;
- 
 }
 
 .prospect-footer {
@@ -337,14 +330,12 @@ td small {
   border-radius: 999px;
   font-size: 0.78rem;
   white-space: nowrap;
-  
 }
 
 .status-pill {
   border: 1px solid rgba(147, 197, 253, 0.4);
   background: rgba(37, 99, 235, 0.18);
   color: #bfdbfe;
-  
 }
 
 .upside-pill {
@@ -657,7 +648,6 @@ td small {
   word-break: break-word;
 }
 
-
 .intelligence-prospect-card {
   position: relative;
   overflow: hidden;
@@ -837,12 +827,11 @@ td small {
 
   border: 1px solid rgba(255, 255, 255, 0.08);
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.05),
-      rgba(255, 255, 255, 0.03)
-    );
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.03)
+  );
 
   backdrop-filter: blur(10px);
 }
@@ -867,7 +856,7 @@ td small {
   margin-bottom: 14px;
 }
 
-.scout-input::placeholder{
+.scout-input::placeholder {
   color: #91ccf3;
 }
 
@@ -894,8 +883,7 @@ td small {
 
   border-color: rgba(0, 200, 255, 0.5);
 
-  box-shadow:
-    0 0 0 3px rgba(0, 170, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.15);
 }
 
 .scout-textarea {
@@ -917,11 +905,7 @@ td small {
 
   color: white;
 
-  background: linear-gradient(
-    135deg,
-    #0ea5e9,
-    #2563eb
-  );
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
 
   transition: all 0.25s ease;
 }
@@ -929,8 +913,7 @@ td small {
 .scout-save-button:hover {
   transform: translateY(-2px);
 
-  box-shadow:
-    0 10px 24px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
 }
 
 .manual-data {
@@ -1004,8 +987,16 @@ td small {
   position: absolute;
   inset: -40%;
   background:
-    radial-gradient(circle at top left, rgba(96, 165, 250, 0.22), transparent 36%),
-    radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.14), transparent 34%);
+    radial-gradient(
+      circle at top left,
+      rgba(96, 165, 250, 0.22),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(34, 197, 94, 0.14),
+      transparent 34%
+    );
   pointer-events: none;
 }
 
@@ -1081,8 +1072,11 @@ td small {
   padding: 18px;
   border-radius: 22px;
   text-align: center;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.035));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.07),
+    rgba(255, 255, 255, 0.035)
+  );
   border: 1px solid rgba(147, 197, 253, 0.16);
 }
 
@@ -1127,12 +1121,10 @@ td small {
   box-shadow: 0 0 28px rgba(250, 204, 21, 0.12);
 }
 
-  .scout-mission-card
-{
+.scout-mission-card {
   margin-top: 15px;
 }
-.player-selector-card
-{
+.player-selector-card {
   margin-top: 15px;
 }
 /* ==============================
@@ -1144,8 +1136,16 @@ td small {
   padding: 18px;
   border-radius: 28px;
   background:
-    radial-gradient(circle at top left, rgba(96, 165, 250, 0.18), transparent 34%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+    radial-gradient(
+      circle at top left,
+      rgba(96, 165, 250, 0.18),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0.025)
+    );
   border: 1px solid rgba(147, 197, 253, 0.18);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.24);
 }
@@ -1211,8 +1211,16 @@ td small {
 
 .hockey-chart-card {
   background:
-    radial-gradient(circle at top left, rgba(96, 165, 250, 0.12), transparent 38%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025));
+    radial-gradient(
+      circle at top left,
+      rgba(96, 165, 250, 0.12),
+      transparent 38%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.065),
+      rgba(255, 255, 255, 0.025)
+    );
 }
 
 .hockey-chart-card .section-header {
@@ -1230,56 +1238,18 @@ td small {
   font-size: 0.86rem;
 }
 .top-nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-
-  padding: 14px 24px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(46, 78, 152, 0.394),
-      rgb(0, 3, 8)
-    );
-
-  border-bottom: 2px solid rgba(70, 130, 255, 0.25);
-
-  backdrop-filter: blur(16px);
-
-  box-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.274);
-}
-
-.nav-pill {
-  padding: 10px 18px;
-  border-radius: 999px;
-  text-decoration: none;
-  font-weight: 700;
-  color: #cbd5e1;
-
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(147,197,253,0.15);
-
-  transition: all 0.2s ease;
-}
-
-.nav-pill:hover {
-  background: rgba(96,165,250,0.15);
-  border-color: rgba(96,165,250,0.35);
-}
-
-.nav-pill.active {
-  background: rgba(96,165,250,0.22);
-  color: white;
-  box-shadow: 0 0 20px rgba(96,165,250,0.18);
-}
-
-.top-nav {
   display: flex;
   justify-content: center;
   gap: 12px;
   margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 14px 24px;
+  background: linear-gradient(180deg, rgba(46, 78, 152, 0.394), rgb(0, 3, 8));
+  border-bottom: 2px solid rgba(70, 130, 255, 0.25);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.274);
 }
 
 .nav-pill {
@@ -1288,22 +1258,20 @@ td small {
   text-decoration: none;
   font-weight: 700;
   color: #cbd5e1;
-
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(147,197,253,0.15);
-
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(147, 197, 253, 0.15);
   transition: all 0.2s ease;
 }
 
 .nav-pill:hover {
-  background: rgba(96,165,250,0.15);
-  border-color: rgba(96,165,250,0.35);
+  background: rgba(96, 165, 250, 0.15);
+  border-color: rgba(96, 165, 250, 0.35);
 }
 
 .nav-pill.active {
-  background: rgba(96,165,250,0.22);
+  background: rgba(96, 165, 250, 0.22);
   color: white;
-  box-shadow: 0 0 20px rgba(96,165,250,0.18);
+  box-shadow: 0 0 20px rgba(96, 165, 250, 0.18);
 }
 
 .leaderboard-list,
@@ -1399,7 +1367,6 @@ td small {
 }
 
 .ai-badge {
-
   gap: 8px;
   padding: 10px 14px;
   border-radius: 50px;
@@ -1413,7 +1380,7 @@ td small {
   border: 1px solid rgba(255, 255, 255, 0.15);
 
   color: #ffffff;
-  font-size: 1rem;
+  font-size: .8rem;
   font-weight: 600;
   text-decoration: none;
 
@@ -1421,7 +1388,7 @@ td small {
 }
 
 .ai-badge:hover {
-  transform: translateY(-2px);
+  /* transform: translateY(-2px); */
 
   border-color: rgba(0, 195, 255, 0.4);
 
@@ -1430,53 +1397,25 @@ td small {
 
 /* card types */
 .prospect-card.platinum {
-  background:
-    linear-gradient(
-      135deg,
-      #ffffff,
-      #d7d7d7,
-      #ffffff
-    );
+  background: linear-gradient(135deg, #ffffff, #d7d7d7, #ffffff);
   border: 3px solid #f5f5f5;
-  box-shadow:
-    0 0 30px rgba(255,255,255,.4);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
 }
 
 .prospect-card.diamond {
-  background:
-    linear-gradient(
-      135deg,
-      #67e8f9,
-      #818cf8,
-      #ec4899
-    );
+  background: linear-gradient(135deg, #67e8f9, #818cf8, #ec4899);
 }
 
 .prospect-card.gold {
-  background:
-    linear-gradient(
-      135deg,
-      #ffd700,
-      #ffb300
-    );
+  background: linear-gradient(135deg, #ffd700, #ffb300);
 }
 
 .prospect-card.silver {
-  background:
-    linear-gradient(
-      135deg,
-      #a6a3a3,
-      #6e6c6c
-    );
+  background: linear-gradient(135deg, #a6a3a3, #6e6c6c);
 }
 
 .prospect-card.bronze {
-  background:
-    linear-gradient(
-      135deg,
-      #896138,
-      #4e3015
-    );
+  background: linear-gradient(135deg, #896138, #4e3015);
 }
 
 .mobile-nav-header {
@@ -1539,8 +1478,7 @@ td small {
   }
 }
 
-.dashboard-card
-{
+.dashboard-card {
   margin-top: 15px;
 }
 .prospect-position {
@@ -1625,7 +1563,6 @@ td small {
   color: #69a3eb;
 }
 
-
 .pagination-controls {
   display: flex;
   align-items: center;
@@ -1641,7 +1578,6 @@ td small {
   display: flex;
   align-items: center;
   gap: 8px;
-  
 }
 
 .sort-control span {
@@ -1696,14 +1632,14 @@ td small {
   padding: 10px 14px;
   border-radius: 14px;
   background: rgba(15, 23, 42, 0.88);
-  border: 1px solid rgba(255,255,255,0.16);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   display: grid;
   gap: 2px;
   text-align: right;
 }
 
 .map-hover-card span {
-  color: rgba(255,255,255,0.72);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 0.85rem;
 }
 .map-hover-card {
@@ -1712,14 +1648,14 @@ td small {
   padding: 10px 14px;
   border-radius: 14px;
   background: rgba(15, 23, 42, 0.88);
-  border: 1px solid rgba(255,255,255,0.16);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   display: grid;
   gap: 2px;
   text-align: right;
 }
 
 .map-hover-card span {
-  color: rgba(255,255,255,0.72);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 0.85rem;
 }
 .hero {
@@ -1733,8 +1669,7 @@ td small {
 
   border-radius: 24px;
 
-  box-shadow:
-    0 18px 50px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
 
   object-fit: cover;
 }
@@ -1840,7 +1775,7 @@ td small {
 }
 
 .publishing-card .hockey-card-photo {
-  margin-top:8px;
+  margin-top: 8px;
   width: 160px;
   height: auto;
   margin: 14px auto 18px;
@@ -1857,13 +1792,13 @@ td small {
   object-position: center top;
   border-radius: 18px;
   display: block;
-   border:2px solid rgba(255,255,255,.18);
-    box-shadow:0 8px 24px rgba(0,0,0,.35);
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .publishing-card .hockey-card-score {
   margin-top: 18px;
-  font-size:5rem;
+  font-size: 5rem;
 }
 
 .publishing-card .publish-photo-credit {
@@ -1895,76 +1830,72 @@ td small {
   opacity: 0.55;
 }
 
-.hockey-card-nameplate h2{
-    font-size:2rem;
-    font-weight:800;
-    margin:10px 0 4px;
+.hockey-card-nameplate h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 10px 0 4px;
 }
 
-.player-team{
-    font-size:1.1rem;
-    opacity:.95;
+.player-team {
+  font-size: 1.1rem;
+  opacity: 0.95;
 }
 
-.player-league{
-    font-size:.95rem;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    opacity:.7;
-    margin-top:4px;
+.player-league {
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-top: 4px;
 }
-.app-intelligence-badge{
-    margin:16px auto 8px;
-    width:max-content;
+.app-intelligence-badge {
+  margin: 16px auto 8px;
+  width: max-content;
 
-    display:flex;
-    flex-direction:column;
-    align-items:center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-    padding:10px 40px;
+  padding: 10px 40px;
 
-    border-radius:999px;
+  border-radius: 999px;
 
-    background:linear-gradient(
-        180deg,
-        #0e3165,
-        #061c40
-    );
+  background: linear-gradient(180deg, #0e3165, #061c40);
 
-    border:1px solid rgba(255,255,255,.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 
-    box-shadow:
-        0 8px 20px rgba(0,0,0,.30),
-        inset 0 1px 0 rgba(255,255,255,.10);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.app-intelligence-badge .badge-label{
-    font-size:.62rem;
-    text-transform:uppercase;
-    letter-spacing:.16em;
-    color:#a8c7ff;
+.app-intelligence-badge .badge-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #a8c7ff;
 }
 
-.app-intelligence-badge strong{
-    margin-top:2px;
-    font-size:1rem;
-    letter-spacing:.08em;
-    color:#fff;
+.app-intelligence-badge strong {
+  margin-top: 2px;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  color: #fff;
 }
 
-.app-intelligence-badge small{
-    margin-top:3px;
-    color:#c9dcff;
-    font-size:.72rem;
-    letter-spacing:.05em;
+.app-intelligence-badge small {
+  margin-top: 3px;
+  color: #c9dcff;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
 }
 
-.publish-version-line{
-    display:block;
-    margin-top:8px;
-    text-align:center;
-    font-size:.68rem;
-    color:rgba(255,255,255,.45);
+.publish-version-line {
+  display: block;
+  margin-top: 8px;
+  text-align: center;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .app-intelligence-badge {
@@ -1976,4 +1907,198 @@ td small {
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+}
+
+.cookie-banner {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+
+  transform: translateX(-50%);
+
+  width: min(94vw, 760px);
+
+  box-sizing: border-box;
+
+  z-index: 8000;
+
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+
+  padding: 18px;
+
+  border-radius: 22px;
+
+  background: rgba(8, 18, 34, 0.96);
+  border: 1px solid rgba(159, 211, 255, 0.22);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.cookie-banner p {
+  margin: 8px 0;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.cookie-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .cookie-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.account-menu {
+  position: relative;
+}
+
+.account-button {
+  border: 1px solid rgba(159, 211, 255, 0.22);
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: rgba(159, 211, 255, 0.1);
+  color: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.account-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 190px;
+  z-index: 7000;
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(159, 211, 255, 0.22);
+  background: rgba(8, 18, 34, 0.98);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+}
+
+.account-dropdown a,
+.account-dropdown button {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-dropdown a:hover,
+.account-dropdown button:hover {
+  background: rgba(159, 211, 255, 0.12);
+}
+
+@media (max-width: 760px) {
+  .top-nav {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .mobile-nav-header {
+    grid-column: 1 / 2;
+  }
+
+  .nav-auth {
+    grid-column: 2 / 3;
+    grid-row: 1;
+    justify-content: flex-end;
+  }
+
+  .nav-links {
+    grid-column: 1 / -1;
+  }
+
+  .account-button {
+    padding: 9px 12px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .account-dropdown {
+    right: 0;
+  }
+}
+
+.session-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  background: #14311c;
+
+  color: #7cff93;
+
+  font-size: 0.8rem;
+
+  font-weight: 700;
+}
+
+.session-badge::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #40ff72;
+}
+.account-summary {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  background: rgba(159, 211, 255, 0.1);
+  border: 1px solid rgba(159, 211, 255, 0.18);
+}
+
+.account-summary strong {
+  color: #ffffff;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.account-summary span {
+  width: fit-content;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(124, 255, 147, 0.14);
+  color: #7cff93;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.account-summary small {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.78rem;
 }
