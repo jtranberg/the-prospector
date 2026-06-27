@@ -68,9 +68,11 @@ export async function changePassword(token, currentPassword, newPassword) {
 
   const data = await response.json();
 
-  if (!response.ok) {
-    throw new Error(data.error || "Password update failed");
-  }
+ if (!response.ok) {
+  const error = new Error(data.error || "Login failed");
+  error.status = response.status;
+  throw error;
+}
 
   return data;
 }
