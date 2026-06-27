@@ -50,7 +50,7 @@
 
 ---
 
-## Global Hockey Intelligence Platform
+## Dave Hall's Prospector Intelligence Platform
 
 Dave Hall's Prospector is a professional hockey intelligence platform designed to help scouts, coaches, recruiters, and hockey operations staff discover, evaluate, organize, and research hockey talent from around the world.
 
