@@ -23,10 +23,15 @@
 
 <p align="center">
   <a href="docs/ABOUT.md">
-    <img src="public/prospectorHero.png" alt="Dave Hall's Prospector" width="100%">
+    <img src="./public/prospectorHero.png" alt="Dave Hall's Prospector" width="100%">
   </a>
+</p>
 
-Modern hockey intelligence platform combining global prospect data, analytics, visualization, and AI-assisted scouting workflows.</P>
+<p align="center">
+  <strong>
+    Modern hockey intelligence platform combining global prospect data, analytics, visualization, and AI-assisted scouting workflows.
+  </strong>
+</p>
 
 ## Global Hockey Intelligence Platform
 
