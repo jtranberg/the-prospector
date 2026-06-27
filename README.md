@@ -33,7 +33,7 @@
 
 **Database:** 226,000+ Prospects
 
-**Coverage:** 100+ Countries
+**Coverage:** 108+ Countries
 
 **Platform:** React • Node.js • Express • MongoDB
 
