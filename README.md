@@ -23,7 +23,7 @@
 
 <p align="center">
   <a href="docs/ABOUT.md">
-    <img src="assets/prospectorHero.png" alt="Dave Hall's Prospector" width="100%">
+    <img src="public/prospectorHero.png" alt="Dave Hall's Prospector" width="100%">
   </a>
 
 Modern hockey intelligence platform combining global prospect data, analytics, visualization, and AI-assisted scouting workflows.</P>
