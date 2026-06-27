@@ -1,5 +1,5 @@
 const API_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5050/api";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5050";
 
 function getHeaders(token) {
   const headers = {
@@ -14,14 +14,10 @@ function getHeaders(token) {
 }
 
 export async function register({ name, email, password }) {
-  const response = await fetch(`${API_URL}/auth/register`, {
+  const response = await fetch(`${API_URL}/api/auth/register`, {
     method: "POST",
     headers: getHeaders(),
-    body: JSON.stringify({
-      name,
-      email,
-      password,
-    }),
+    body: JSON.stringify({ name, email, password }),
   });
 
   const data = await response.json();
@@ -34,13 +30,10 @@ export async function register({ name, email, password }) {
 }
 
 export async function login({ email, password }) {
-  const response = await fetch(`${API_URL}/auth/login`, {
+  const response = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: getHeaders(),
-    body: JSON.stringify({
-      email,
-      password,
-    }),
+    body: JSON.stringify({ email, password }),
   });
 
   const data = await response.json();
@@ -53,7 +46,7 @@ export async function login({ email, password }) {
 }
 
 export async function getCurrentUser(token) {
-  const response = await fetch(`${API_URL}/auth/me`, {
+  const response = await fetch(`${API_URL}/api/auth/me`, {
     headers: getHeaders(token),
   });
 
@@ -66,18 +59,11 @@ export async function getCurrentUser(token) {
   return data.user;
 }
 
-export async function changePassword(
-  token,
-  currentPassword,
-  newPassword,
-) {
-  const response = await fetch(`${API_URL}/auth/change-password`, {
+export async function changePassword(token, currentPassword, newPassword) {
+  const response = await fetch(`${API_URL}/api/auth/change-password`, {
     method: "POST",
     headers: getHeaders(token),
-    body: JSON.stringify({
-      currentPassword,
-      newPassword,
-    }),
+    body: JSON.stringify({ currentPassword, newPassword }),
   });
 
   const data = await response.json();
