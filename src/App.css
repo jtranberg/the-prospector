@@ -2102,3 +2102,9 @@ td small {
   color: rgba(255, 255, 255, 0.68);
   font-size: 0.78rem;
 }
+
+
+.success-text {
+  color: #8fffb0;
+  font-weight: 700;
+}

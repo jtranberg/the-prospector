@@ -16,6 +16,7 @@ export default function RegisterPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -30,6 +31,7 @@ export default function RegisterPage() {
     event.preventDefault();
 
     setError("");
+    setSuccess("");
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
@@ -45,9 +47,17 @@ export default function RegisterPage() {
         password: form.password,
       });
 
-      navigate("/");
+      setSuccess("Account created successfully. Taking you to your dashboard...");
+
+      setTimeout(() => {
+        navigate("/");
+      }, 900);
     } catch (err) {
-      setError(err.message || "Registration failed");
+      if (err.status === 409 || err.message?.toLowerCase().includes("already")) {
+        setError("An account with this email already exists. Please log in instead.");
+      } else {
+        setError(err.message || "Registration failed.");
+      }
     } finally {
       setLoading(false);
     }
@@ -118,19 +128,15 @@ export default function RegisterPage() {
           </label>
 
           {error && <p className="error-text">{error}</p>}
+          {success && <p className="success-text">{success}</p>}
 
-          <button
-            className="button-link"
-            type="submit"
-            disabled={loading}
-          >
+          <button className="button-link" type="submit" disabled={loading}>
             {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 
         <p className="muted">
-          Already have an account?{" "}
-          <Link to="/login">Log in here</Link>
+          Already have an account? <Link to="/login">Log in here</Link>
         </p>
       </section>
     </main>

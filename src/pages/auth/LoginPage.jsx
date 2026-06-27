@@ -27,22 +27,28 @@ export default function LoginPage() {
     }));
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+async function handleSubmit(event) {
+  event.preventDefault();
 
-    try {
-      setLoading(true);
-      setError("");
+  try {
+    setLoading(true);
+    setError("");
 
-      await login(form);
+    await login(form);
 
-      navigate(from, { replace: true });
-    } catch (err) {
-      setError(err.message || "Login failed");
-    } finally {
-      setLoading(false);
+    navigate(from, { replace: true });
+  } catch (err) {
+    if (err.status === 401) {
+      setError("Incorrect email or password.");
+    } else if (err.status === 500) {
+      setError("The server is temporarily unavailable. Please try again.");
+    } else {
+      setError(err.message || "Unable to log in. Please try again.");
     }
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <main className="app-shell">
