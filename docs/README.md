@@ -1,6 +1,5 @@
 # Dave Hall's Prospector
 
-```markdown
 # Dave Hall's Prospector
 ![Built by App Intelligence](https://img.shields.io/badge/App%20Intelligence-Engineering%20Platform-0A66C2?style=for-the-badge)
 
@@ -17,14 +16,13 @@
 ![License](https://img.shields.io/badge/license-Proprietary-red?style=flat-square)
 ![Maintained](https://img.shields.io/badge/Maintained-Yes-success?style=flat-square)
 ![Docs](https://img.shields.io/badge/Documentation-Complete-blue?style=flat-square)
-```
-```markdown
+
 ![Scouting](https://img.shields.io/badge/Hockey-Intelligence-0055A4?style=flat-square)
 ![Analytics](https://img.shields.io/badge/Analytics-Live-orange?style=flat-square)
 ![Trust Center](https://img.shields.io/badge/Trust%20Center-Enterprise-success?style=flat-square)
 ![Architecture](https://img.shields.io/badge/Architecture-Layered-555?style=flat-square)
 ![Documentation](https://img.shields.io/badge/Docs-15%20Professional%20Guides-informational?style=flat-square)
-```
+
 
 
 ## Project Status
