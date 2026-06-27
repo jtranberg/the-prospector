@@ -1,13 +1,49 @@
 # Dave Hall's Prospector
 
+```markdown
+# Dave Hall's Prospector
+![Built by App Intelligence](https://img.shields.io/badge/App%20Intelligence-Engineering%20Platform-0A66C2?style=for-the-badge)
+
+![Version](https://img.shields.io/badge/version-1.0%20Professional-blue?style=flat-square)
+![Status](https://img.shields.io/badge/status-Active%20Development-brightgreen?style=flat-square)
+![Database](https://img.shields.io/badge/database-226K%2B%20Prospects-success?style=flat-square)
+![Coverage](https://img.shields.io/badge/coverage-100%2B%20Countries-blueviolet?style=flat-square)
+
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white&style=flat-square)
+![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=node.js&logoColor=white&style=flat-square)
+![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?logo=mongodb&logoColor=white&style=flat-square)
+![AI](https://img.shields.io/badge/AI-Human--Assisted-6A5ACD?style=flat-square)
+
+![License](https://img.shields.io/badge/license-Proprietary-red?style=flat-square)
+![Maintained](https://img.shields.io/badge/Maintained-Yes-success?style=flat-square)
+![Docs](https://img.shields.io/badge/Documentation-Complete-blue?style=flat-square)
+```
+```markdown
+![Scouting](https://img.shields.io/badge/Hockey-Intelligence-0055A4?style=flat-square)
+![Analytics](https://img.shields.io/badge/Analytics-Live-orange?style=flat-square)
+![Trust Center](https://img.shields.io/badge/Trust%20Center-Enterprise-success?style=flat-square)
+![Architecture](https://img.shields.io/badge/Architecture-Layered-555?style=flat-square)
+![Documentation](https://img.shields.io/badge/Docs-15%20Professional%20Guides-informational?style=flat-square)
+```
+
+
 ## Project Status
 
-**Status:** Active Development  
-**Version:** 1.0 Professional Edition  
-**Platform:** React • Node.js • Express • MongoDB  
-**Database:** 226,000+ Hockey Prospects  
-**Coverage:** 100+ Countries  
-**Maintained By:** App Intelligence
+# Dave Hall's Prospector
+
+## Global Hockey Intelligence Platform
+
+**Status:** Active Development
+
+**Version:** 1.0 Professional Edition
+
+**Database:** 226,000+ Prospects
+
+**Coverage:** 100+ Countries
+
+**Platform:** React • Node.js • Express • MongoDB
+
+**Maintained by:** App Intelligence
 
 ---
 

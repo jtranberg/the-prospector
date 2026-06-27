@@ -25,7 +25,7 @@ app.use(express.json());
 app.get("/api/health", (req, res) => {
   res.json({
     ok: true,
-    service: "Little Prospector API",
+    service: "The Prospector API",
   });
 });
 
