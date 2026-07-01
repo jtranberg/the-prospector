@@ -76,3 +76,50 @@ export async function changePassword(token, currentPassword, newPassword) {
 
   return data;
 }
+
+export async function forgotPassword(email) {
+  const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to process password reset request");
+  }
+
+  return data;
+}
+
+export async function resetPassword(token, newPassword) {
+  const response = await fetch(`${API_URL}/api/auth/reset-password`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({ token, newPassword }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to reset password");
+  }
+
+  return data;
+}
+
+export async function deleteMyData(token) {
+  const response = await fetch(`${API_URL}/api/auth/delete-my-data`, {
+    method: "DELETE",
+    headers: getHeaders(token),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to delete account data");
+  }
+
+  return data;
+}

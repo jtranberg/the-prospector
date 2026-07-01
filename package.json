@@ -9,7 +9,8 @@
     "start": "node src/api/server.js",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -40,6 +41,9 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
-    "vite": "^8.0.12"
+    "mongodb-memory-server": "^11.2.0",
+    "supertest": "^7.2.2",
+    "vite": "^8.0.12",
+    "vitest": "^4.1.9"
   }
 }

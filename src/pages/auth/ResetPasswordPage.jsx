@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
 
-export default function ChangePasswordPage() {
-  const { changePassword } = useAuth();
+export default function ResetPasswordPage() {
+  const { resetPassword } = useAuth();
+
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const token = searchParams.get("token") || "";
 
   const [form, setForm] = useState({
-    currentPassword: "",
-    newPassword: "",
+    password: "",
     confirmPassword: "",
   });
 
@@ -28,15 +32,20 @@ export default function ChangePasswordPage() {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    setSuccess("");
     setError("");
+    setSuccess("");
 
-    if (form.newPassword !== form.confirmPassword) {
-      setError("New passwords do not match.");
+    if (!token) {
+      setError("This password reset link is invalid or has expired.");
       return;
     }
 
-    if (form.newPassword.length < 8) {
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    if (form.password.length < 8) {
       setError("Password must be at least 8 characters.");
       return;
     }
@@ -44,17 +53,15 @@ export default function ChangePasswordPage() {
     try {
       setLoading(true);
 
-      await changePassword(form.currentPassword, form.newPassword);
+      await resetPassword(token, form.password);
 
-      setSuccess("Password updated successfully.");
+      setSuccess("Your password has been reset successfully.");
 
-      setForm({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (err) {
-      setError(err.message || "Unable to update password.");
+      setError(err.message || "Unable to reset your password.");
     } finally {
       setLoading(false);
     }
@@ -63,36 +70,23 @@ export default function ChangePasswordPage() {
   return (
     <main className="app-shell">
       <section className="dashboard-card auth-card">
-        <p className="eyebrow">Account Security</p>
+        <p className="eyebrow">Account Recovery</p>
 
-        <h1>Change Password</h1>
+        <h1>Reset Password</h1>
 
         <p className="muted">
-          Keep your account secure by using a strong password that you don't use
-          anywhere else.
+          Enter a new password for your account. Your password must be at least
+          8 characters long.
         </p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          <label>
-            Current Password
-            <input
-              className="scout-input"
-              type="password"
-              name="currentPassword"
-              value={form.currentPassword}
-              onChange={updateField}
-              autoComplete="current-password"
-              required
-            />
-          </label>
-
           <label>
             New Password
             <input
               className="scout-input"
               type="password"
-              name="newPassword"
-              value={form.newPassword}
+              name="password"
+              value={form.password}
               onChange={updateField}
               autoComplete="new-password"
               required
@@ -124,8 +118,12 @@ export default function ChangePasswordPage() {
             </div>
           )}
 
-          <button className="button-link" type="submit" disabled={loading}>
-            {loading ? "Updating Password..." : "Update Password"}
+          <button
+            className="button-link"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? "Resetting Password..." : "Reset Password"}
           </button>
         </form>
 
@@ -138,12 +136,12 @@ export default function ChangePasswordPage() {
             flexWrap: "wrap",
           }}
         >
-          <Link className="button-link" to="/">
-            Dashboard
+          <Link className="button-link" to="/login">
+            Back to Login
           </Link>
 
-          <Link className="button-link" to="/delete-my-data">
-            Delete My Account Data
+          <Link className="button-link" to="/register">
+            Create Account
           </Link>
         </div>
       </section>

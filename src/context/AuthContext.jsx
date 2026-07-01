@@ -8,12 +8,13 @@ import { AuthContext } from "./authContextObject";
 
 import {
   changePassword as changePasswordRequest,
+  deleteMyData as deleteMyDataRequest,
+  forgotPassword as forgotPasswordRequest,
   getCurrentUser,
   login as loginRequest,
   register as registerRequest,
+  resetPassword as resetPasswordRequest,
 } from "../services/authService";
-
-
 
 const TOKEN_KEY = "prospector-auth-token";
 
@@ -107,16 +108,41 @@ export function AuthProvider({ children }) {
     [token],
   );
 
+  const forgotPassword = useCallback(async (email) => {
+    return forgotPasswordRequest(email);
+  }, []);
+
+  const resetPassword = useCallback(async (resetToken, newPassword) => {
+    return resetPasswordRequest(resetToken, newPassword);
+  }, []);
+
+  const deleteMyData = useCallback(async () => {
+    if (!token) {
+      throw new Error("You must be logged in to delete your account data");
+    }
+
+    const result = await deleteMyDataRequest(token);
+
+    logout();
+
+    return result;
+  }, [token, logout]);
+
   const value = useMemo(
     () => ({
       token,
       user,
       authLoading,
       isAuthenticated: Boolean(user && token),
+
       register,
       login,
       logout,
+
       changePassword,
+      forgotPassword,
+      resetPassword,
+      deleteMyData,
     }),
     [
       token,
@@ -126,6 +152,9 @@ export function AuthProvider({ children }) {
       login,
       logout,
       changePassword,
+      forgotPassword,
+      resetPassword,
+      deleteMyData,
     ],
   );
 

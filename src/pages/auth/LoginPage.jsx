@@ -96,9 +96,15 @@ async function handleSubmit(event) {
           </button>
         </form>
 
+          <p className="muted">
+          <Link to="/forgot-password">Forgot your password?</Link>
+        </p>
+
         <p className="muted">
           Need an account? <Link to="/register">Register here</Link>
         </p>
+
+       
       </section>
     </main>
   );

@@ -21,7 +21,11 @@ import SystemArchitecturePage from "./pages/legal/SystemArchitecturePage";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ChangePasswordPage from "./pages/auth/ChangePasswordPage";
+import DeleteAccountDataPage from "./pages/auth/DeleteAccountDataPage";
+
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import CookieConsentBanner from "./components/common/CookieConsentBanner";
 
@@ -35,8 +39,9 @@ const csvProspects = loadCsvProspects();
 function App() {
   const [prospects, setProspects] = useState(csvProspects);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, logout, isAuthenticated } = useAuth();
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+
+  const { user, logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
     async function loadMongoProspects() {
@@ -73,6 +78,7 @@ function App() {
             ☰
           </button>
         </div>
+
         <div className={`nav-links ${mobileMenuOpen ? "open" : ""}`}>
           <Link
             to="/"
@@ -106,61 +112,72 @@ function App() {
             Contact
           </Link>
         </div>
+
         <div className="nav-auth">
           {isAuthenticated ? (
-            <>
-              <div className="account-menu">
-                <button
-                  className="account-button"
-                  type="button"
-                  onClick={() => setAccountMenuOpen((open) => !open)}
-                  aria-expanded={accountMenuOpen}
-                >
-                  {user?.name || "Scout"} ▾
-                </button>
+            <div className="account-menu">
+              <button
+                className="account-button"
+                type="button"
+                onClick={() => setAccountMenuOpen((open) => !open)}
+                aria-expanded={accountMenuOpen}
+              >
+                {user?.name || "Scout"} ▾
+              </button>
 
-                {accountMenuOpen && (
-                  <div className="account-dropdown">
-                    <div className="account-summary">
-                      <strong>{user?.name || "Scout"}</strong>
-                      <span>{user?.role || "SCOUT"}</span>
-                      <small>Secure Scout Session</small>
-                    </div>
-
-                    <Link
-                      to="/change-password"
-                      onClick={() => {
-                        setAccountMenuOpen(false);
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      Change Password
-                    </Link>
-                    <span className="session-badge">Secure Session</span>
-                    <Link
-                      to="/trust"
-                      onClick={() => {
-                        setAccountMenuOpen(false);
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      Trust Center
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        logout();
-                        setAccountMenuOpen(false);
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      Logout
-                    </button>
+              {accountMenuOpen && (
+                <div className="account-dropdown">
+                  <div className="account-summary">
+                    <strong>{user?.name || "Scout"}</strong>
+                    <span>{user?.role || "SCOUT"}</span>
+                    <small>Secure Scout Session</small>
                   </div>
-                )}
-              </div>
-            </>
+
+                  <Link
+                    to="/change-password"
+                    onClick={() => {
+                      setAccountMenuOpen(false);
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    Change Password
+                  </Link>
+
+                  <Link
+                    to="/delete-my-data"
+                    onClick={() => {
+                      setAccountMenuOpen(false);
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    Delete My Account Data
+                  </Link>
+
+                  <span className="session-badge">Secure Session</span>
+
+                  <Link
+                    to="/trust"
+                    onClick={() => {
+                      setAccountMenuOpen(false);
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    Trust Center
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout();
+                      setAccountMenuOpen(false);
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <Link
@@ -180,7 +197,8 @@ function App() {
               </Link>
             </>
           )}
-        </div>{" "}
+        </div>
+
         <a
           href="https://appintelligence.ca"
           target="_blank"
@@ -230,6 +248,8 @@ function App() {
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route
           path="/change-password"
@@ -239,7 +259,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/delete-my-data"
+          element={
+            <ProtectedRoute>
+              <DeleteAccountDataPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
+
       <CookieConsentBanner />
     </>
   );
