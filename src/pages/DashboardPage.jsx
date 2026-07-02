@@ -10,6 +10,7 @@ import { getScoutXP, getScoutLevel } from "../lib/gamification";
 
 import WorldProspectMap from "../components/WorldProspectMap";
 import { publishPlayerCard } from "../lib/publisher";
+import { useAuth } from "../hooks/useAuth";
 
 import {
   loadProspectById,
@@ -37,6 +38,11 @@ function getPipelineHealth(coveragePercent) {
 }
 
 function DashboardPage({ prospects = [] }) {
+  const { user } = useAuth();
+console.log(user);
+  const workspaceName =
+  user?.workspaceName?.trim() ||
+  `${user?.name || "Scout"}'s Prospector`;
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
   const [selectedPlayerDetail, setSelectedPlayerDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -445,12 +451,18 @@ function DashboardPage({ prospects = [] }) {
       )}
 
       <section className="hero">
-        <img
-          src="/prospectorHero.png"
-          alt="Dave Hall's Prospector - Global Hockey Intelligence"
-          className="hero-banner"
-        />
-      </section>
+  <img
+    src="/prospectorHero.png"
+    alt="The Prospector"
+    className="hero-banner"
+  />
+
+  <div className="hero-overlay">
+    <h1>{workspaceName}</h1>
+
+    <p>Global Hockey Intelligence Platform</p>
+  </div>
+</section>
 
       <section className="stats-grid">
         <StatCard label="Global Prospects" value={playerCountDisplay} />
@@ -888,7 +900,7 @@ function DashboardPage({ prospects = [] }) {
 
       <footer className="dashboard-footer">
         <div className="footer-brand">
-          <strong>DAVE HALL&apos;S Prospector</strong>
+          <strong>{workspaceName}</strong>
           <span>Global Hockey Intelligence Platform</span>
         </div>
 
@@ -908,7 +920,7 @@ function DashboardPage({ prospects = [] }) {
         </div>
 
         <div className="footer-copy">
-          Dave Hall's Prospector Version 1.0 © 2026 App Intelligence
+          {workspaceName} Version 1.0 © 2026 App Intelligence
         </div>
       </footer>
     </main>

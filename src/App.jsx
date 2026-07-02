@@ -42,6 +42,13 @@ function App() {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
   const { user, logout, isAuthenticated } = useAuth();
+  useEffect(() => {
+    const workspaceName =
+      user?.workspaceName?.trim() ||
+      (user?.name ? `${user.name}'s Prospector` : "The Prospector");
+
+    document.title = workspaceName;
+  }, [user?.workspaceName, user?.name]);
 
   useEffect(() => {
     async function loadMongoProspects() {
@@ -67,7 +74,10 @@ function App() {
     <>
       <nav className="top-nav">
         <div className="mobile-nav-header">
-          <strong>Dave Hall&apos;s Prospector</strong>
+          <strong>
+            {user?.workspaceName?.trim() ||
+              (user?.name ? `${user.name}'s Prospector` : "The Prospector")}
+          </strong>
 
           <button
             className="hamburger-button"
@@ -128,9 +138,9 @@ function App() {
               {accountMenuOpen && (
                 <div className="account-dropdown">
                   <div className="account-summary">
-                    <strong>{user?.name || "Scout"}</strong>
-                    <span>{user?.role || "SCOUT"}</span>
-                    <small>Secure Scout Session</small>
+                    <strong>{user?.workspaceName || "My Prospector"}</strong>
+                    <span>{user?.name || "Scout"}</span>
+                    <small>{user?.role || "SCOUT"} • Secure Session</small>
                   </div>
 
                   <Link

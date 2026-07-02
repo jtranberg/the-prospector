@@ -39,7 +39,7 @@
 
 **Version:** 1.0 Professional Edition
 
-**Database:** 226,000+ Prospects
+**Database:** 233,000+ Prospects
 
 **Coverage:** 108+ Countries
 

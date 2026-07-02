@@ -13,6 +13,7 @@ function getSafeUser(user) {
   return {
     id: user._id.toString(),
     name: user.name,
+    workspaceName: user.workspaceName,
     email: user.email,
     role: user.role,
   };
@@ -24,10 +25,11 @@ function hashResetToken(token) {
 
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, workspaceName } = req.body;
 
     const cleanEmail = String(email || "").trim().toLowerCase();
     const cleanName = String(name || "").trim();
+    const cleanWorkspaceName = String(workspaceName || "").trim();
 
     if (!cleanEmail || !password) {
       return res.status(400).json({
@@ -53,6 +55,8 @@ router.post("/register", async (req, res) => {
 
     const user = await User.create({
       name: cleanName,
+      workspaceName:
+        cleanWorkspaceName || `${cleanName || "Scout"}'s Prospector`,
       email: cleanEmail,
       passwordHash,
       role: "SCOUT",
@@ -193,7 +197,6 @@ router.post("/forgot-password", async (req, res) => {
 
     const user = await User.findOne({ email: cleanEmail });
 
-    // Do not reveal whether the account exists.
     if (!user || !user.isActive) {
       return res.json({
         ok: true,

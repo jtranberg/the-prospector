@@ -28,7 +28,7 @@ export async function requireAuth(req, res, next) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findById(decoded.userId).select(
-      "_id name email role isActive",
+      "_id name workspaceName email role isActive",
     );
 
     if (!user || !user.isActive) {
@@ -40,6 +40,7 @@ export async function requireAuth(req, res, next) {
     req.user = {
       id: user._id.toString(),
       name: user.name,
+      workspaceName: user.workspaceName,
       email: user.email,
       role: user.role,
     };

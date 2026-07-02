@@ -9,14 +9,14 @@ export default function RegisterPage() {
 
   const [form, setForm] = useState({
     name: "",
+    workspaceName: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -31,10 +31,14 @@ export default function RegisterPage() {
     event.preventDefault();
 
     setError("");
-    setSuccess("");
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+
+    if (form.password.length < 8) {
+      setError("Password must be at least 8 characters.");
       return;
     }
 
@@ -43,21 +47,14 @@ export default function RegisterPage() {
 
       await register({
         name: form.name,
+        workspaceName: form.workspaceName,
         email: form.email,
         password: form.password,
       });
 
-      setSuccess("Account created successfully. Taking you to your dashboard...");
-
-      setTimeout(() => {
-        navigate("/");
-      }, 900);
+      navigate("/", { replace: true });
     } catch (err) {
-      if (err.status === 409 || err.message?.toLowerCase().includes("already")) {
-        setError("An account with this email already exists. Please log in instead.");
-      } else {
-        setError(err.message || "Registration failed.");
-      }
+      setError(err.message || "Registration failed.");
     } finally {
       setLoading(false);
     }
@@ -66,27 +63,51 @@ export default function RegisterPage() {
   return (
     <main className="app-shell">
       <section className="dashboard-card auth-card">
-        <p className="eyebrow">Create Account</p>
+        <p className="eyebrow">Create Your Prospector</p>
 
-        <h1>Join The Prospector</h1>
+        <h1>Register</h1>
 
         <p className="muted">
-          Create your secure scouting account to access protected platform
-          features.
+          Create your personalized Prospector workspace.
         </p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <label>
-            Full Name
+            Your Name
+            <small className="muted">
+              Your personal account name used for your profile.
+            </small>
             <input
               className="scout-input"
               type="text"
               name="name"
               value={form.name}
               onChange={updateField}
-              required
+              autoComplete="name"
+              placeholder="Jay Tranberg"
             />
           </label>
+
+          <label>
+            My Prospector Name
+            <small className="muted">
+              The name of your private scouting workspace. It appears on your
+              dashboard, browser tab, reports, and shared player cards.
+            </small>
+            <input
+              className="scout-input"
+              type="text"
+              name="workspaceName"
+              value={form.workspaceName}
+              onChange={updateField}
+              placeholder="Jay's Prospector"
+              maxLength={100}
+            />
+          </label>
+
+          <p className="muted">
+            Leave this blank and we&apos;ll create one automatically.
+          </p>
 
           <label>
             Email
@@ -128,10 +149,9 @@ export default function RegisterPage() {
           </label>
 
           {error && <p className="error-text">{error}</p>}
-          {success && <p className="success-text">{success}</p>}
 
           <button className="button-link" type="submit" disabled={loading}>
-            {loading ? "Creating Account..." : "Create Account"}
+            {loading ? "Creating Prospector..." : "Create My Prospector"}
           </button>
         </form>
 

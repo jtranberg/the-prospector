@@ -13,17 +13,29 @@ function getHeaders(token) {
   return headers;
 }
 
-export async function register({ name, email, password }) {
+export async function register({
+  name,
+  workspaceName,
+  email,
+  password,
+}) {
   const response = await fetch(`${API_URL}/api/auth/register`, {
     method: "POST",
     headers: getHeaders(),
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({
+      name,
+      workspaceName,
+      email,
+      password,
+    }),
   });
 
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error || "Registration failed");
+    const error = new Error(data.error || "Registration failed");
+    error.status = response.status;
+    throw error;
   }
 
   return data;
@@ -69,7 +81,7 @@ export async function changePassword(token, currentPassword, newPassword) {
   const data = await response.json();
 
  if (!response.ok) {
-  const error = new Error(data.error || "Login failed");
+  const error = new Error(data.error || "Could not change password");
   error.status = response.status;
   throw error;
 }

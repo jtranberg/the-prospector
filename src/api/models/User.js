@@ -8,6 +8,14 @@ const userSchema = new mongoose.Schema(
       maxlength: 80,
     },
 
+    // Personalized private-label workspace
+    workspaceName: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      default: "",
+    },
+
     email: {
       type: String,
       required: true,
